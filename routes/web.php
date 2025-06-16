@@ -3,9 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\HandleInertiaRequests;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Bienvenido', [
@@ -26,12 +25,13 @@ Route::middleware(['auth'])->get('/perfil', function () {
     return Inertia::render('Profile/Edit');
 })->name('profile.edit');
 
-use App\Http\Controllers\DashboardController;
-
-
 Route::middleware(['auth', 'verified'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
+// logout
+Route::middleware(['auth'])->post('/logout', function () {
+    auth()->logout();
+    return redirect('/');
+})->name('logout');
 
 
 require __DIR__.'/auth.php';

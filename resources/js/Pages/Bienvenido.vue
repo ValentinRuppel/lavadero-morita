@@ -12,6 +12,11 @@
         Iniciar Sesión
       </Link>
     </div>
+<div class="flex gap-4">
+      <Link href="/register" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow transition">
+        Registrarse
+      </Link>
+    </div>
   </div>
 </template>
 
