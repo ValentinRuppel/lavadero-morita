@@ -13,6 +13,9 @@ defineProps({
         type: String,
     },
 });
+defineOptions({
+  layout: AppLayout,
+})
 </script>
 
 <template>

@@ -11,9 +11,6 @@
       <Link href="/login" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow transition">
         Iniciar Sesión
       </Link>
-      <Link href="/precios" class="bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg transition">
-        Ver Precios
-      </Link>
     </div>
   </div>
 </template>
