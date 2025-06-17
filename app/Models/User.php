@@ -46,4 +46,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function vehiculos()
+    {
+        return $this->hasMany(Vehiculo::class, 'user_id'); // Asegúrate de usar 'user_id'
+    }
+
+    // Método para verificar si el usuario es cliente
+    public function isCliente()
+    {
+        return $this->role === 'cliente';
+    }
+
+    // Método para verificar si el usuario es admin (ejemplo)
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
 }
