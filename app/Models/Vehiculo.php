@@ -10,14 +10,24 @@ class Vehiculo extends Model
     use HasFactory;
 
     protected $fillable = [
-        'marca',
-        'modelo',
-        'anio',
-        'patente',
-        'color',
-        'tipos_vehiculo_id',
         'user_id',
+        'tipo_vehiculo_id', // Si todavía la usas, manténla
+        'modelo_id',       // <-- ¡Añade esta línea!
+        'marca',           // <-- Si quieres guardar la marca directamente en Vehiculo, añádelo aquí
+                           //     (aunque lo obtendremos del modelo ahora)
+        'modelo',          // <-- Si quieres guardar el modelo directamente en Vehiculo, añádelo aquí
+                           //     (aunque lo obtendremos del modelo ahora)
+        'patente',
+        'anio',
     ];
+
+    /**
+     * Get the user that owns the Vehiculo.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get the tipoVehiculo that owns the Vehiculo.
@@ -28,10 +38,16 @@ class Vehiculo extends Model
     }
 
     /**
-     * Get the user (client) that owns the Vehiculo.
+     * Get the modelo that owns the Vehiculo.  <-- ¡Añade esta relación!
      */
-    public function user() // Cambiado de 'cliente' a 'user'
+    public function modelo()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Modelo::class);
     }
+
+    // Si también quieres acceder directamente a la marca desde el vehículo
+    // public function marca()
+    // {
+    //     return $this->hasOneThrough(Marca::class, Modelo::class);
+    // }
 }

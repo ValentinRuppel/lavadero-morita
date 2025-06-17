@@ -13,8 +13,10 @@ class TipoVehiculoSeeder extends Seeder
      */
     public function run(): void
     {
-        TipoVehiculo::firstOrCreate(['nombre' => 'Coche'], ['precio' => 25.00]);
-        TipoVehiculo::firstOrCreate(['nombre' => 'Moto'], ['precio' => 15.00]);
-        TipoVehiculo::firstOrCreate(['nombre' => 'Camioneta'], ['precio' => 35.00]);
+        TipoVehiculo::firstOrCreate(['nombre' => 'Auto'], ['precio' => 50.00]);
+        TipoVehiculo::firstOrCreate(['nombre' => 'Moto'], ['precio' => 25.00]);
+        TipoVehiculo::firstOrCreate(['nombre' => 'Camioneta'], ['precio' => 75.00]);
+        TipoVehiculo::firstOrCreate(['nombre' => 'SUV'], ['precio' => 60.00]);
+        // Agrega más tipos si es necesario
     }
 }

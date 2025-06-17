@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Vehiculo;
 use App\Models\User;
 use App\Models\TipoVehiculo;
+use App\Models\Marca; // Necesitas importar Marca
+use App\Models\Modelo; // Necesitas importar Modelo
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+use Illuminate\Support\Facades\Auth; // Para acceder a Auth::id()
 
 class VehiculoController extends Controller
 {
     /**
      * Constructor para aplicar middlewares (opcional, pero buena práctica)
      */
+    // protected $middleware = ['auth']; // Puedes ponerlo así directamente si no necesitas lógica compleja
 
     /**
      * Display a listing of the resource (Vehiculos/Index).
@@ -24,15 +27,16 @@ class VehiculoController extends Controller
     {
         $user = $request->user();
 
-        $vehiculos = Vehiculo::with(['user', 'tipoVehiculo'])->latest()->paginate(10);
+        // Asegúrate de cargar la relación 'modelo' y 'marca' si vas a mostrarla en la tabla
+        $vehiculos = Vehiculo::with(['user', 'tipoVehiculo', 'modelo.marca'])->latest()->paginate(10);
 
         return Inertia::render('Vehiculos/Index', [
             'vehiculos' => $vehiculos->through(fn ($vehiculo) => [
                 'id' => $vehiculo->id,
-                'marca' => $vehiculo->marca,
-                'modelo' => $vehiculo->modelo,
+                'marca_nombre' => $vehiculo->modelo->marca->nombre ?? 'N/A', // Obtén la marca del modelo
+                'modelo_nombre' => $vehiculo->modelo->nombre ?? 'N/A',       // Obtén el modelo
                 'patente' => $vehiculo->patente,
-                'color' => $vehiculo->color,
+                // 'color' => $vehiculo->color, // <-- ¡Eliminada!
                 'anio' => $vehiculo->anio,
                 'tipo_nombre' => $vehiculo->tipoVehiculo->nombre ?? 'N/A',
                 'tipo_precio' => $vehiculo->tipoVehiculo->precio ?? 0,
@@ -48,14 +52,19 @@ class VehiculoController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function create(Request $request) // <-- ¡¡ESTE ES EL MÉTODO QUE FALTABA!!
+    public function create(Request $request)
     {
-        $user = $request->user(); // Obtén el usuario autenticado para pasarlo al layout
+        $user = $request->user();
+
+        // No pasamos clientes, ya que el usuario autenticado será el dueño
         $tiposVehiculo = TipoVehiculo::orderBy('nombre')->get(['id', 'nombre', 'precio']);
+        $marcas = Marca::orderBy('nombre')->get(['id', 'nombre']); // <-- Pasa las marcas
 
         return Inertia::render('Vehiculos/Create', [
-            'user' => $user, // Pasa el usuario al layout
-            'tiposVehiculo' => $tiposVehiculo, // Pasa los tipos de vehículo si es necesario
+            'user' => $user,
+            'tiposVehiculo' => $tiposVehiculo,
+            'marcas' => $marcas, // <-- Pasa las marcas al frontend
+            // No pasamos 'clientes'
         ]);
     }
 
@@ -68,21 +77,48 @@ class VehiculoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'marca' => ['required', 'string', 'max:255'],
-            'modelo' => ['required', 'string', 'max:255'],
-            'anio' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            // 'marca' y 'modelo' ya no son directos, ahora usamos 'modelo_id'
+            'modelo_id' => ['required', 'exists:modelos,id'], // Validar que el modelo exista
+            'anio' => ['required', 'integer', 'min:1900', 'max:' . date('Y')], // Año hasta el actual
             'patente' => ['required', 'string', 'max:20', \Illuminate\Validation\Rule::unique('vehiculos', 'patente')],
-            'color' => ['nullable', 'string', 'max:50'],
+            // 'color' ya no se valida
             'tipo_vehiculo_id' => ['required', 'exists:tipos_vehiculos,id'],
-            'user_id' => ['required', 'exists:users,id', \Illuminate\Validation\Rule::exists('users', 'id')->where(function ($query) {
-                $query->where('role', 'cliente');
-            })],
+            // 'user_id' ya no se valida aquí, se asigna automáticamente
         ]);
 
-        Vehiculo::create($request->all());
+        Vehiculo::create([
+            'user_id' => Auth::id(), // <-- Asignar automáticamente el ID del usuario logueado
+            'modelo_id' => $request->modelo_id,
+            'tipo_vehiculo_id' => $request->tipo_vehiculo_id,
+            'patente' => $request->patente,
+            // 'color' ya no se guarda
+            'anio' => $request->anio,
+        ]);
 
         return redirect()->route('vehiculos.index')
-                        ->with('success', 'Vehículo creado exitosamente.');
+                         ->with('success', 'Vehículo registrado exitosamente.'); // Cambiado a "Registrado"
+    }
+
+    /**
+     * Endpoint para obtener modelos basados en una marca seleccionada
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getModelosByMarca(Request $request)
+    {
+        $request->validate([
+            'marca_id' => ['required', 'exists:marcas,id'],
+        ]);
+
+        $modelos = Modelo::where('marca_id', $request->marca_id)
+                         ->orderBy('nombre')
+                         // Asegúrate de seleccionar el tipo_vehiculo_id
+                         // y también la relación tipoVehiculo para mostrar su nombre/precio
+                         ->with('tipoVehiculo') // <-- Carga la relación
+                         ->get(['id', 'nombre', 'anio_inicio', 'anio_fin', 'tipo_vehiculo_id']);
+
+        return response()->json($modelos);
     }
 
     /**
@@ -94,16 +130,16 @@ class VehiculoController extends Controller
     public function show(Request $request, Vehiculo $vehiculo)
     {
         $user = $request->user();
-        $vehiculo->load(['user', 'tipoVehiculo']);
+        $vehiculo->load(['user', 'tipoVehiculo', 'modelo.marca']); // Cargar relaciones necesarias
 
         return Inertia::render('Vehiculos/Show', [
             'vehiculo' => [
                 'id' => $vehiculo->id,
-                'marca' => $vehiculo->marca,
-                'modelo' => $vehiculo->modelo,
+                'marca_nombre' => $vehiculo->modelo->marca->nombre ?? 'N/A',
+                'modelo_nombre' => $vehiculo->modelo->nombre ?? 'N/A',
                 'anio' => $vehiculo->anio,
                 'patente' => $vehiculo->patente,
-                'color' => $vehiculo->color,
+                // 'color' => $vehiculo->color, // <-- ¡Eliminada!
                 'tipo_nombre' => $vehiculo->tipoVehiculo->nombre ?? 'N/A',
                 'tipo_precio' => $vehiculo->tipoVehiculo->precio ?? 0,
                 'cliente_nombre' => $vehiculo->user->name ?? 'N/A',
@@ -124,22 +160,33 @@ class VehiculoController extends Controller
     public function edit(Request $request, Vehiculo $vehiculo)
     {
         $user = $request->user();
-        $clientes = User::where('role', 'cliente')->orderBy('name')->get(['id', 'name']);
+        // Los clientes ya no se pasan para edición de usuario
         $tiposVehiculo = TipoVehiculo::orderBy('nombre')->get(['id', 'nombre', 'precio']);
+        $marcas = Marca::orderBy('nombre')->get(['id', 'nombre']);
+
+        // Cargar el modelo del vehículo existente para preseleccionar
+        $vehiculo->load('modelo');
+        $modelosMarcaActual = [];
+        if ($vehiculo->modelo) {
+            $modelosMarcaActual = Modelo::where('marca_id', $vehiculo->modelo->marca_id)
+                                    ->orderBy('nombre')
+                                    ->get(['id', 'nombre', 'anio_inicio', 'anio_fin']);
+        }
 
         return Inertia::render('Vehiculos/Edit', [
             'vehiculo' => [
                 'id' => $vehiculo->id,
-                'marca' => $vehiculo->marca,
-                'modelo' => $vehiculo->modelo,
+                // 'marca' y 'modelo' directos ya no son necesarios si usas modelo_id
+                'modelo_id' => $vehiculo->modelo_id,
                 'anio' => $vehiculo->anio,
                 'patente' => $vehiculo->patente,
-                'color' => $vehiculo->color,
+                // 'color' => $vehiculo->color, // <-- ¡Eliminada!
                 'tipo_vehiculo_id' => $vehiculo->tipo_vehiculo_id,
-                'user_id' => $vehiculo->user_id,
+                'user_id' => $vehiculo->user_id, // Puede ser útil para mostrar, pero no editable
             ],
-            'clientes' => $clientes,
             'tiposVehiculo' => $tiposVehiculo,
+            'marcas' => $marcas,
+            'modelosMarcaActual' => $modelosMarcaActual, // Modelos de la marca del vehículo actual
             'user' => $user,
         ]);
     }
@@ -154,18 +201,21 @@ class VehiculoController extends Controller
     public function update(Request $request, Vehiculo $vehiculo)
     {
         $request->validate([
-            'marca' => ['required', 'string', 'max:255'],
-            'modelo' => ['required', 'string', 'max:255'],
-            'anio' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'modelo_id' => ['required', 'exists:modelos,id'],
+            'anio' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
             'patente' => ['required', 'string', 'max:20', \Illuminate\Validation\Rule::unique('vehiculos', 'patente')->ignore($vehiculo->id)],
-            'color' => ['nullable', 'string', 'max:50'],
+            // 'color' ya no se valida
             'tipo_vehiculo_id' => ['required', 'exists:tipos_vehiculos,id'],
-            'user_id' => ['required', 'exists:users,id', \Illuminate\Validation\Rule::exists('users', 'id')->where(function ($query) {
-                $query->where('role', 'cliente');
-            })],
+            // 'user_id' no debería ser editable por el cliente
         ]);
 
-        $vehiculo->update($request->all());
+        $vehiculo->update([
+            'modelo_id' => $request->modelo_id,
+            'tipo_vehiculo_id' => $request->tipo_vehiculo_id,
+            'patente' => $request->patente,
+            // 'color' ya no se guarda
+            'anio' => $request->anio,
+        ]);
 
         return redirect()->route('vehiculos.index')
                          ->with('success', 'Vehículo actualizado exitosamente.');
@@ -184,4 +234,5 @@ class VehiculoController extends Controller
         return redirect()->route('vehiculos.index')
                          ->with('success', 'Vehículo eliminado exitosamente.');
     }
+
 }

@@ -1,25 +1,28 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useForm, Head } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue'; // Importa 'computed'
+import { ref, watch, onMounted, computed } from 'vue'; // Importa 'computed'
 import axios from 'axios';
 
 const props = defineProps({
     user: Object,
-    tiposVehiculo: Array, // Lista de todos los tipos de vehículo
-    marcas: Array,        // Lista de todas las marcas
+    vehiculo: Object, // El vehículo que se está editando
+    tiposVehiculo: Array,
+    marcas: Array,
+    modelosMarcaActual: Array, // Modelos de la marca del vehículo que se está editando
 });
 
 const form = useForm({
-    modelo_id: '',
-    patente: '',
-    anio: '',
-    tipo_vehiculo_id: '', // Este campo se llenará automáticamente
+    _method: 'PUT',
+    modelo_id: props.vehiculo.modelo_id,
+    patente: props.vehiculo.patente,
+    anio: props.vehiculo.anio,
+    tipo_vehiculo_id: props.vehiculo.tipo_vehiculo_id, // precargar con el tipo_vehiculo_id del vehículo
 });
 
 const modelosDisponibles = ref([]);
 const marcaSeleccionada = ref('');
-const modeloSeleccionadoObjeto = ref(null); // <-- Nuevo: para guardar el objeto del modelo seleccionado
+const modeloSeleccionadoObjeto = ref(null); // Para guardar el objeto del modelo seleccionado
 
 // Watcher para la marca seleccionada: carga los modelos
 watch(marcaSeleccionada, async (newMarcaId) => {
@@ -45,22 +48,36 @@ watch(marcaSeleccionada, async (newMarcaId) => {
 // Watcher para el modelo seleccionado: asigna el tipo de vehículo
 watch(() => form.modelo_id, (newModeloId) => {
     if (newModeloId) {
-        // Encuentra el objeto modelo completo de los modelos disponibles
         const selectedModel = modelosDisponibles.value.find(modelo => modelo.id === newModeloId);
         if (selectedModel && selectedModel.tipo_vehiculo_id) {
             form.tipo_vehiculo_id = selectedModel.tipo_vehiculo_id;
-            modeloSeleccionadoObjeto.value = selectedModel; // Guarda el objeto modelo para futuras referencias
+            modeloSeleccionadoObjeto.value = selectedModel;
         } else {
-            form.tipo_vehiculo_id = ''; // Si el modelo no tiene tipo o no se encuentra
+            form.tipo_vehiculo_id = '';
             modeloSeleccionadoObjeto.value = null;
         }
     } else {
-        form.tipo_vehiculo_id = ''; // Si no hay modelo seleccionado
+        form.tipo_vehiculo_id = '';
         modeloSeleccionadoObjeto.value = null;
     }
 });
 
-// Opcional: Propiedad computada para mostrar el nombre del tipo de vehículo seleccionado automáticamente
+// onMounted para precargar la marca, el modelo y el tipo al cargar el componente
+onMounted(() => {
+    if (props.vehiculo.modelo) { // Asegúrate de que el vehículo tenga su relación 'modelo' cargada
+        marcaSeleccionada.value = props.vehiculo.modelo.marca_id;
+        // Cuando marcaSeleccionada.value cambia, el watcher de marca hará la llamada y poblará modelosDisponibles.
+        // Después de que modelosDisponibles se haya poblado, el watcher de form.modelo_id debería configurar el tipo.
+
+        // Dado que el watcher de marcaSeleccionada es async, podemos inicializar modelosDisponibles
+        // con los modelosMarcaActual para que el dropdown de modelos tenga opciones desde el inicio.
+        modelosDisponibles.value = props.modelosMarcaActual;
+        
+        // El form.modelo_id ya está precargado desde props.vehiculo.modelo_id.
+        // El watcher de form.modelo_id se ejecutará automáticamente y establecerá form.tipo_vehiculo_id.
+    }
+});
+
 const tipoVehiculoAutoSeleccionadoNombre = computed(() => {
     if (form.tipo_vehiculo_id) {
         const tipo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
@@ -71,15 +88,12 @@ const tipoVehiculoAutoSeleccionadoNombre = computed(() => {
 
 
 const submit = () => {
-    form.post(route('vehiculos.store'), {
+    form.post(route('vehiculos.update', props.vehiculo.id), {
         onSuccess: () => {
-            form.reset();
-            marcaSeleccionada.value = ''; // Resetear también la marca seleccionada
-            modelosDisponibles.value = []; // Limpiar modelos
-            modeloSeleccionadoObjeto.value = null;
+            // No resetear en edición, usualmente
         },
         onError: (errors) => {
-            console.error('Error al registrar el vehículo:', errors);
+            console.error('Error al actualizar el vehículo:', errors);
         }
     });
 };
@@ -90,10 +104,10 @@ const getCurrentYear = () => {
 </script>
 
 <template>
-    <AppLayout title="Registrar Vehículo" :user="user">
+    <AppLayout title="Editar Vehículo">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Registrar Nuevo Vehículo
+                Editar Vehículo
             </h2>
         </template>
 
@@ -184,13 +198,19 @@ const getCurrentYear = () => {
                             <div v-if="form.errors.tipo_vehiculo_id" class="text-red-500 text-xs mt-1">{{ form.errors.tipo_vehiculo_id }}</div>
                         </div>
 
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Cliente:</label>
+                            <p class="py-2 px-3 text-gray-700">{{ vehiculo.cliente_nombre }}</p>
+                        </div>
+
+
                         <div class="flex items-center justify-end mt-4">
                             <button
                                 type="submit"
                                 :disabled="form.processing || !form.modelo_id || !form.tipo_vehiculo_id"
                                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             >
-                                {{ form.processing ? 'Registrando...' : 'Registrar Vehículo' }}
+                                {{ form.processing ? 'Actualizando...' : 'Actualizar Vehículo' }}
                             </button>
                         </div>
                     </form>

@@ -15,19 +15,21 @@ class CreateVehiculosTable extends Migration
     {
         Schema::create('vehiculos', function (Blueprint $table) {
             $table->id();
-            $table->string('marca');
-            $table->string('modelo');
+            // Originalmente tenías 'marca' y 'modelo' como strings, ahora usaremos modelo_id
+            // $table->string('marca'); // Eliminado
+            // $table->string('modelo'); // Eliminado
+
+            $table->foreignId('modelo_id')->nullable()->constrained('modelos')->onDelete('set null'); // <-- Añadido: foreign key a 'modelos'
+            
             $table->integer('anio')->nullable();
             $table->string('patente')->unique();
-            $table->string('color')->nullable();
+            // $table->string('color')->nullable(); // <-- Eliminado: la migración de remover color lo quitaba
 
-            // Clave Foránea para TipoVehiculo
+            // Clave Foránea para TipoVehiculo (ya estaba bien)
             $table->foreignId('tipo_vehiculo_id')->constrained('tipos_vehiculos')->onDelete('restrict');
 
-            // Clave Foránea para Cliente (ahora apuntando a la tabla 'users')
-            // La relación 1:1 o 1:N que discutimos antes. Asumo 1:N aquí (un usuario/cliente puede tener muchos vehículos).
+            // Clave Foránea para Cliente (user_id) (ya estaba bien)
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            // Renombrado de 'cliente_id' a 'user_id' para mayor claridad.
 
             $table->timestamps();
         });

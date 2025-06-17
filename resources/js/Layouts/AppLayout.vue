@@ -10,7 +10,7 @@ defineProps({
   <div class="min-h-screen bg-gray-100">
     <header class="bg-white shadow">
       <div class="max-w-7xl mx-auto py-6 px-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-blue-700">Morita Lavadero</h1>
+        <Link href="/dashboard" class="text-xl font-bold text-blue-700">Morita Lavadero</Link>
         <div class="space-x-4">
           <span class="text-sm text-gray-600">👤 {{ user?.name ?? 'Invitado' }}</span>
           <Link href="/perfil" class="text-blue-600 hover:underline">Perfil</Link>

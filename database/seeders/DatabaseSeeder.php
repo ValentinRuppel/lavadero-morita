@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,13 +12,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'), // Asegúrate de usar bcrypt para el password
-            'role' => 'admin', // Asignamos el rol de admin
+        // Llama a otros seeders aquí
+        $this->call([
+            TipoVehiculoSeeder::class, // Primero los tipos de vehículo
+            MarcaModeloSeeder::class,  // Luego marcas y modelos (que ahora dependen de tipos_vehiculos)
+            // UserSeeder::class, // Si tienes un seeder de usuarios
         ]);
     }
 }

@@ -33,13 +33,16 @@ Route::middleware(['auth'])->post('/logout', function () {
     Auth::logout();
     return redirect('/');
 })->name('logout');
-
-Route::middleware(['auth', 'verified'])->get('/vehiculos', [VehiculoController::class, 'index'])->name('vehiculos.index');
-Route::middleware(['auth', 'verified'])->get('/vehiculos/create', [VehiculoController::class, 'create'])->name('vehiculos.create');
-Route::middleware(['auth', 'verified'])->post('/vehiculos', [VehiculoController::class, 'store'])->name('vehiculos.store');
-Route::middleware(['auth', 'verified'])->get('/vehiculos/{vehiculo}', [VehiculoController::class, 'show'])->name('vehiculos.show');
-Route::middleware(['auth', 'verified'])->get('/vehiculos/{vehiculo}/edit', [VehiculoController::class, 'edit'])->name('vehiculos.edit');
-Route::middleware(['auth', 'verified'])->put('/vehiculos/{vehiculo}', [VehiculoController::class, 'update'])->name('vehiculos.update');
-Route::middleware(['auth', 'verified'])->delete('/vehiculos/{vehiculo}', [VehiculoController::class, 'destroy'])->name('vehiculos.destroy');
+// quiero hacer un grupo de auth y verified para las rutas de vehiculos y meter todos estos adentro porfa
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/vehiculos', [VehiculoController::class, 'index'])->name('vehiculos.index');
+    Route::get('/vehiculos/create', [VehiculoController::class, 'create'])->name('vehiculos.create');
+    Route::get('/vehiculos/modelos-by-marca', [VehiculoController::class, 'getModelosByMarca'])->name('vehiculos.modelosByMarca');
+    Route::post('/vehiculos', [VehiculoController::class, 'store'])->name('vehiculos.store');
+    Route::get('/vehiculos/{vehiculo}', [VehiculoController::class, 'show'])->name('vehiculos.show');
+    Route::get('/vehiculos/{vehiculo}/edit', [VehiculoController::class, 'edit'])->name('vehiculos.edit');
+    Route::put('/vehiculos/{vehiculo}', [VehiculoController::class, 'update'])->name('vehiculos.update');
+    Route::delete('/vehiculos/{vehiculo}', [VehiculoController::class, 'destroy'])->name('vehiculos.destroy');
+});
 
 require __DIR__.'/auth.php';
