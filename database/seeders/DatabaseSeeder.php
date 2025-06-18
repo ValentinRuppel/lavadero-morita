@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,11 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Llama a otros seeders aquí
         $this->call([
-            TipoVehiculoSeeder::class, // Primero los tipos de vehículo
-            MarcaModeloSeeder::class,  // Luego marcas y modelos (que ahora dependen de tipos_vehiculos)
-            // UserSeeder::class, // Si tienes un seeder de usuarios
+            TipoVehiculoSeeder::class,
+            MarcaModeloSeeder::class,
+            AdministratorSeeder::class, // Para administradores
         ]);
     }
 }

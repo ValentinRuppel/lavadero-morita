@@ -10,13 +10,14 @@ import { Link } from '@inertiajs/vue3';
         <div>
             <Link href="/">
                 <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
+                <!-- puedo cambia la imagen
+                <img src="/storage/logo.png" alt="Logo Lavadero" class="w-24 h-auto mx-auto" /> -->
             </Link>
         </div>
 
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
-        >
+        <div class="w-[75vw] h-[75vh] bg-white flex items-center justify-center mx-auto">
             <slot />
         </div>
+
     </div>
 </template>

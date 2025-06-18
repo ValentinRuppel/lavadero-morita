@@ -19,7 +19,7 @@ const form = useForm({
 })
 
 const submit = () => {
-    form.post(route('login'), {
+    form.post(route('admin.login'), {
         onFinish: () => form.reset('password'),
     })
 }
@@ -27,11 +27,11 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Ingreso Cliente" />
+        <Head title="Ingreso Administrador" />
 
         <div class="w-[65vw] flex items-center justify-center bg-gradient-to-br from-[#caf0f8] to-[#0077b6] rounded-xl h-[65vh] mx-auto my-10 shadow-lg">
     <div class="bg-white rounded-xl shadow-lg p-10 items-center justify-center px-8 py-6 w-full max-w-md center mx-auto">
-        <h2 class="text-3xl font-bold text-[#0077b6] mb-8 text-center">Inicio de Sesion</h2>
+        <h2 class="text-3xl font-bold text-[#0077b6] mb-8 text-center">Panel de Administración</h2>
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}
@@ -71,7 +71,7 @@ const submit = () => {
             </div>
 
             <PrimaryButton :disabled="form.processing" class="w-full bg-[#0077b6] hover:bg-[#005f8a]">
-                Ingresar
+                INGRESAR AL PANEL
             </PrimaryButton>
         </form>
     </div>
