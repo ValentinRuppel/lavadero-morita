@@ -198,11 +198,6 @@ const getCurrentYear = () => {
                             <div v-if="form.errors.tipo_vehiculo_id" class="text-red-500 text-xs mt-1">{{ form.errors.tipo_vehiculo_id }}</div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Cliente:</label>
-                            <p class="py-2 px-3 text-gray-700">{{ vehiculo.cliente_nombre }}</p>
-                        </div>
-
 
                         <div class="flex items-center justify-end mt-4">
                             <button

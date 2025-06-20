@@ -142,7 +142,6 @@ class VehiculoController extends Controller
                 // 'color' => $vehiculo->color, // <-- ¡Eliminada!
                 'tipo_nombre' => $vehiculo->tipoVehiculo->nombre ?? 'N/A',
                 'tipo_precio' => $vehiculo->tipoVehiculo->precio ?? 0,
-                'cliente_nombre' => $vehiculo->user->name ?? 'N/A',
                 'cliente_id' => $vehiculo->user->id,
                 'created_at' => $vehiculo->created_at->format('d/m/Y H:i'),
                 'updated_at' => $vehiculo->updated_at->format('d/m/Y H:i'),
@@ -160,11 +159,8 @@ class VehiculoController extends Controller
     public function edit(Request $request, Vehiculo $vehiculo)
     {
         $user = $request->user();
-        // Los clientes ya no se pasan para edición de usuario
         $tiposVehiculo = TipoVehiculo::orderBy('nombre')->get(['id', 'nombre', 'precio']);
         $marcas = Marca::orderBy('nombre')->get(['id', 'nombre']);
-
-        // Cargar el modelo del vehículo existente para preseleccionar
         $vehiculo->load('modelo');
         $modelosMarcaActual = [];
         if ($vehiculo->modelo) {
@@ -176,17 +172,15 @@ class VehiculoController extends Controller
         return Inertia::render('Vehiculos/Edit', [
             'vehiculo' => [
                 'id' => $vehiculo->id,
-                // 'marca' y 'modelo' directos ya no son necesarios si usas modelo_id
                 'modelo_id' => $vehiculo->modelo_id,
                 'anio' => $vehiculo->anio,
                 'patente' => $vehiculo->patente,
-                // 'color' => $vehiculo->color, // <-- ¡Eliminada!
                 'tipo_vehiculo_id' => $vehiculo->tipo_vehiculo_id,
-                'user_id' => $vehiculo->user_id, // Puede ser útil para mostrar, pero no editable
+                'user_id' => $vehiculo->user_id,
             ],
             'tiposVehiculo' => $tiposVehiculo,
             'marcas' => $marcas,
-            'modelosMarcaActual' => $modelosMarcaActual, // Modelos de la marca del vehículo actual
+            'modelosMarcaActual' => $modelosMarcaActual,
             'user' => $user,
         ]);
     }
@@ -226,13 +220,12 @@ class VehiculoController extends Controller
      *
      * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Http\RedirectResponse
-     */
+    */
     public function destroy(Vehiculo $vehiculo)
     {
         $vehiculo->delete();
-
-        return redirect()->route('vehiculos.index')
-                         ->with('success', 'Vehículo eliminado exitosamente.');
+        return redirect()->route('vehiculos.index');
     }
+
 
 }

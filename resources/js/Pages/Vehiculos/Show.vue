@@ -44,10 +44,6 @@ const props = defineProps({
                         <p class="text-gray-900">{{ vehiculo.tipo_nombre }} (${{ vehiculo.tipo_precio }})</p>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Cliente:</label>
-                        <p class="text-gray-900">{{ vehiculo.cliente_nombre }}</p>
-                    </div>
 
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Registrado el:</label>

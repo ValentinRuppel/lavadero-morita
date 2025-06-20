@@ -11,9 +11,15 @@ const props = defineProps({
 // Función para eliminar un vehículo
 const deleteVehiculo = (id) => {
     if (confirm('¿Estás seguro de que quieres eliminar este vehículo?')) {
-        router.delete(route('vehiculos.destroy', id), {
+        router.post(`/vehiculos/${id}`, {
+            _method: 'delete', // spoofing del método
+        }, {
             onSuccess: () => {
-                // Esto recargará la página o actualizará la tabla
+                router.visit(route('vehiculos.index'), {
+                    method: 'get',
+                    preserveState: true,
+                    preserveScroll: true,
+                });
             },
             onError: (errors) => {
                 console.error('Error al eliminar vehículo:', errors);
@@ -21,6 +27,9 @@ const deleteVehiculo = (id) => {
         });
     }
 };
+
+
+
 
 </script>
 
@@ -56,7 +65,6 @@ const deleteVehiculo = (id) => {
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patente</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th> <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th> <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Año</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
@@ -68,7 +76,6 @@ const deleteVehiculo = (id) => {
                                     <td class="px-6 py-4 whitespace-nowrap">{{ vehiculo.patente }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ vehiculo.marca_nombre }}</td> <td class="px-6 py-4 whitespace-nowrap">{{ vehiculo.modelo_nombre }}</td> <td class="px-6 py-4 whitespace-nowrap">{{ vehiculo.anio }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ vehiculo.tipo_nombre }} (${{ vehiculo.tipo_precio }})</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ vehiculo.cliente_nombre }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <Link :href="route('vehiculos.show', vehiculo.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Ver</Link>
                                         <Link :href="route('vehiculos.edit', vehiculo.id)" class="text-yellow-600 hover:text-yellow-900 mr-3">Editar</Link>
