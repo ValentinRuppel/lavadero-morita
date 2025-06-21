@@ -11,9 +11,12 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        return Inertia::render('Dashboard',
+        $tabla = $user->getTable();
+
+        return Inertia::render(
+            $tabla === 'administrators' ? 'Admin/Dashboard' : 'Dashboard',
             [
-                'user' => $user, 
+                'user' => $user,
             ]
         );
     }
