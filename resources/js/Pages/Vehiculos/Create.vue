@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useForm, Head } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue'; // Importa 'computed'
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -19,7 +19,7 @@ const form = useForm({
 
 const modelosDisponibles = ref([]);
 const marcaSeleccionada = ref('');
-const modeloSeleccionadoObjeto = ref(null); // <-- Nuevo: para guardar el objeto del modelo seleccionado
+const modeloSeleccionadoObjeto = ref(null); // Para guardar el objeto del modelo seleccionado con sus años
 
 // Watcher para la marca seleccionada: carga los modelos
 watch(marcaSeleccionada, async (newMarcaId) => {
@@ -27,6 +27,8 @@ watch(marcaSeleccionada, async (newMarcaId) => {
     form.modelo_id = '';
     form.tipo_vehiculo_id = ''; // Limpiar tipo si cambia la marca
     modeloSeleccionadoObjeto.value = null; // Limpiar objeto modelo
+    form.anio = ''; // Limpiar año al cambiar la marca
+    form.patente = ''; // Limpiar patente al cambiar la marca
 
     if (newMarcaId) {
         try {
@@ -42,22 +44,85 @@ watch(marcaSeleccionada, async (newMarcaId) => {
     }
 });
 
-// Watcher para el modelo seleccionado: asigna el tipo de vehículo
+// Watcher para el modelo seleccionado: asigna el tipo de vehículo y el objeto modelo completo
 watch(() => form.modelo_id, (newModeloId) => {
     if (newModeloId) {
-        // Encuentra el objeto modelo completo de los modelos disponibles
         const selectedModel = modelosDisponibles.value.find(modelo => modelo.id === newModeloId);
-        if (selectedModel && selectedModel.tipo_vehiculo_id) {
+        if (selectedModel) {
             form.tipo_vehiculo_id = selectedModel.tipo_vehiculo_id;
-            modeloSeleccionadoObjeto.value = selectedModel; // Guarda el objeto modelo para futuras referencias
+            modeloSeleccionadoObjeto.value = selectedModel; // Guarda el objeto modelo completo
+            form.anio = ''; // Limpiar el año si el modelo cambia
+            form.patente = ''; // Limpiar la patente si el modelo cambia
         } else {
-            form.tipo_vehiculo_id = ''; // Si el modelo no tiene tipo o no se encuentra
+            form.tipo_vehiculo_id = '';
             modeloSeleccionadoObjeto.value = null;
+            form.anio = '';
+            form.patente = '';
         }
     } else {
-        form.tipo_vehiculo_id = ''; // Si no hay modelo seleccionado
+        form.tipo_vehiculo_id = '';
         modeloSeleccionadoObjeto.value = null;
+        form.anio = '';
+        form.patente = '';
     }
+});
+
+// Watcher para el año: limpiar patente si cambia el año (para re-evaluar la longitud)
+watch(() => form.anio, (newAnio, oldAnio) => {
+    // Only clear if the previous anio was valid and the new one might change the length rule
+    if (newAnio && oldAnio && (
+        (newAnio < 2016 && oldAnio >= 2016) ||
+        (newAnio >= 2016 && oldAnio < 2016)
+    )) {
+        // Only clear if it's an auto/camioneta where the rule changes
+        const selectedTipoVehiculo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
+        if (selectedTipoVehiculo && (selectedTipoVehiculo.nombre === 'Auto' || selectedTipoVehiculo.nombre === 'Camioneta')) {
+            form.patente = '';
+        }
+    } else if (!newAnio) { // If year is cleared
+        form.patente = '';
+    }
+}, { immediate: false }); // Do not run immediately on component mount
+
+
+// Propiedad computada para determinar el año mínimo permitido
+const minAnioPermitido = computed(() => {
+    return modeloSeleccionadoObjeto.value ? modeloSeleccionadoObjeto.value.anio_inicio : null;
+});
+
+// Propiedad computada para determinar el año máximo permitido
+const maxAnioPermitido = computed(() => {
+    const currentYear = new Date().getFullYear();
+    if (modeloSeleccionadoObjeto.value) {
+        return modeloSeleccionadoObjeto.value.anio_fin || currentYear;
+    }
+    return null;
+});
+
+// Computed property for maximum patent length
+const maxPatenteLength = computed(() => {
+    const selectedTipoVehiculo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
+
+    if (!selectedTipoVehiculo || !form.anio) {
+        return null; // No restriction until type and year are selected
+    }
+
+    const tipoNombre = selectedTipoVehiculo.nombre;
+    const anio = form.anio;
+
+    if (tipoNombre === 'Auto' || tipoNombre === 'Camioneta') {
+        // Logic for cars and trucks based on year
+        if (anio < 2016) { // Old or intermediate format
+            return 7; // e.g., AAA NNN or ABC 123 (including space)
+        } else { // Mercosur format
+            return 9; // e.g., AA NNN LL or AB 123 CD (including spaces)
+        }
+    } else if (tipoNombre === 'Moto') {
+        // Fixed length for motorcycles (most common formats)
+        return 7; // e.g., 123 ABC or A 123 BC (including space)
+    }
+
+    return null; // Default, no restriction
 });
 
 // Opcional: Propiedad computada para mostrar el nombre del tipo de vehículo seleccionado automáticamente
@@ -82,10 +147,6 @@ const submit = () => {
             console.error('Error al registrar el vehículo:', errors);
         }
     });
-};
-
-const getCurrentYear = () => {
-    return new Date().getFullYear();
 };
 </script>
 
@@ -146,29 +207,40 @@ const getCurrentYear = () => {
                         </div>
 
                         <div class="mb-4">
-                            <label for="patente" class="block text-gray-700 text-sm font-bold mb-2">Patente:</label>
-                            <input
-                                id="patente"
-                                type="text"
-                                v-model="form.patente"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                required
-                            />
-                            <div v-if="form.errors.patente" class="text-red-500 text-xs mt-1">{{ form.errors.patente }}</div>
-                        </div>
-
-                        <div class="mb-4">
                             <label for="anio" class="block text-gray-700 text-sm font-bold mb-2">Año:</label>
                             <input
                                 id="anio"
                                 type="number"
                                 v-model="form.anio"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                :max="getCurrentYear()"
-                                min="1900"
+                                :min="minAnioPermitido"
+                                :max="maxAnioPermitido"
+                                :disabled="!modeloSeleccionadoObjeto"
                                 required
                             />
-                            <div v-if="form.errors.anio" class="text-red-500 text-xs mt-1">{{ form.errors.anio }}</div>
+                            <div v-if="form.errors.anio" class="text-red-500 text-xs mt-1">
+                                {{ form.errors.anio }}
+                                <span v-if="modeloSeleccionadoObjeto && form.anio && (form.anio < minAnioPermitido || form.anio > maxAnioPermitido)">
+                                    (Debe estar entre {{ minAnioPermitido }} y {{ maxAnioPermitido }})
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="patente" class="block text-gray-700 text-sm font-bold mb-2">Patente:</label>
+                            <input
+                                id="patente"
+                                type="text"
+                                v-model="form.patente"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                :maxlength="maxPatenteLength" :disabled="!form.anio || !form.tipo_vehiculo_id" required
+                            />
+                            <div v-if="form.errors.patente" class="text-red-500 text-xs mt-1">
+                                {{ form.errors.patente }}
+                                <span v-if="form.patente && maxPatenteLength && form.patente.length > maxPatenteLength">
+                                    (Máximo {{ maxPatenteLength }} caracteres para este año y tipo de vehículo)
+                                </span>
+                            </div>
                         </div>
 
                         <div class="mb-4">
@@ -187,7 +259,7 @@ const getCurrentYear = () => {
                         <div class="flex items-center justify-end mt-4">
                             <button
                                 type="submit"
-                                :disabled="form.processing || !form.modelo_id || !form.tipo_vehiculo_id"
+                                :disabled="form.processing || !form.modelo_id || !form.tipo_vehiculo_id || !form.anio || !form.patente"
                                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             >
                                 {{ form.processing ? 'Registrando...' : 'Registrar Vehículo' }}

@@ -112,11 +112,17 @@ class VehiculoController extends Controller
         ]);
 
         $modelos = Modelo::where('marca_id', $request->marca_id)
-                         ->orderBy('nombre')
-                         // Asegúrate de seleccionar el tipo_vehiculo_id
-                         // y también la relación tipoVehiculo para mostrar su nombre/precio
-                         ->with('tipoVehiculo') // <-- Carga la relación
-                         ->get(['id', 'nombre', 'anio_inicio', 'anio_fin', 'tipo_vehiculo_id']);
+                          ->orderBy('nombre')
+                          ->with('tipoVehiculo') // Carga la relación
+                          ->get(['id', 'nombre', 'anio_inicio', 'anio_fin', 'tipo_vehiculo_id']);
+
+        // Transformar la colección para asegurar que anio_fin siempre sea un año concreto
+        $currentYear = date('Y');
+        $modelos->each(function ($modelo) use ($currentYear) {
+            if (is_null($modelo->anio_fin)) {
+                $modelo->anio_fin = $currentYear;
+            }
+        });
 
         return response()->json($modelos);
     }
