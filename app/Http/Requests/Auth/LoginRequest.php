@@ -41,7 +41,18 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = $this->only('email', 'password');
+        $remember = $this->boolean('remember');
+
+        // Intenta autenticar con el guardia 'admin' primero
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        // Si el login con 'admin' falla, intenta con el guardia 'web' (para usuarios normales)
+        if (! Auth::guard('web')->attempt($credentials, $remember)) {
+            // Si ambos fallan, incrementa el rate limiter y lanza la excepción.
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -49,6 +60,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Si el login con 'web' es exitoso, limpia el rate limiter.
         RateLimiter::clear($this->throttleKey());
     }
 
