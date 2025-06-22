@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Box;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\TipoLavado; // ¡Importa el modelo TipoLavado!
+use App\Models\Vehiculo; // ¡Importa el modelo Vehiculo! (Si vas a permitir registrarlo en el mismo formulario)
+use Illuminate\Support\Facades\Auth; // Para obtener el administrador logueado
 
 class BoxController extends Controller
 {
@@ -20,26 +23,29 @@ class BoxController extends Controller
         // Esto es un ejemplo, ajusta las relaciones si necesitas más datos
         $boxes->load(['serviciosLavado' => function ($query) {
             $query->where('estado_servicio', 'en_curso')
-                  ->with(['vehiculo', 'tipoLavado', 'administrador']); // Carga las relaciones necesarias para el servicio
+                ->with(['vehiculo', 'tipoLavado', 'administrador']); // Carga las relaciones necesarias para el servicio
         }]);
         $user = $request->user();
-
-        // Retorna la vista de Inertia con los datos de los boxes
-        return Inertia::render('Boxes/Index', [
-            'user' => $user,
-            'boxes' => $boxes->map(function ($box) {
-                // Mapea los boxes para incluir solo los servicios en curso y formatear datos
-                return [
-                    'id' => $box->id,
-                    'nombre_box' => $box->nombre_box,
-                    'descripcion' => $box->descripcion,
-                    'estado' => $box->estado,
-                    'servicio_en_curso' => $box->serviciosLavado->first(), // Obtiene el primer servicio en curso (asumiendo uno por box)
-                    'created_at' => $box->created_at->diffForHumans(), // Formatear fechas si es necesario
-                    'updated_at' => $box->updated_at->diffForHumans(),
-                ];
-            }),
-        ]);
+        $tabla = $user->getTable();
+        if ($tabla === 'administrators') {
+            // Retorna la vista de Inertia con los datos de los boxes
+            return Inertia::render('Boxes/Index', [
+                'user' => $user,
+                'boxes' => $boxes->map(function ($box) {
+                    // Mapea los boxes para incluir solo los servicios en curso y formatear datos
+                    return [
+                        'id' => $box->id,
+                        'nombre_box' => $box->nombre_box,
+                        'descripcion' => $box->descripcion,
+                        'estado' => $box->estado,
+                        'servicio_en_curso' => $box->serviciosLavado->first(), // Obtiene el primer servicio en curso (asumiendo uno por box)
+                        'created_at' => $box->created_at->diffForHumans(), // Formatear fechas si es necesario
+                        'updated_at' => $box->updated_at->diffForHumans(),
+                    ];
+                }),
+            ]);
+        }
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -65,19 +71,27 @@ class BoxController extends Controller
         Box::create($validated);
 
         return redirect()->route('boxes.index')
-                         ->with('success', 'Box creado exitosamente.');
+            ->with('success', 'Box creado exitosamente.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Box $box)
+    public function show(Box $box, Request $request)
     {
         // Carga el servicio en curso, si lo hay, con sus relaciones
         $box->load(['serviciosLavado' => function ($query) {
             $query->where('estado_servicio', 'en_curso')
                 ->with(['vehiculo', 'tipoLavado', 'administrador']);
         }]);
+
+        // Obtener todos los tipos de lavado disponibles
+        $tiposLavado = TipoLavado::orderBy('nombre_lavado')->get();
+
+        // Puedes obtener una lista de vehículos existentes si el usuario va a seleccionarlos
+        // O si vas a permitir registrar uno nuevo en el momento, esta lista podría ser para "vehículos frecuentes"
+        $vehiculos = Vehiculo::orderBy('patente')->get(); // O solo los más recientes, o con paginación
+        $user = $request->user();
 
         return Inertia::render('Boxes/Show', [
             'box' => [
@@ -89,6 +103,21 @@ class BoxController extends Controller
                 'created_at' => $box->created_at->diffForHumans(),
                 'updated_at' => $box->updated_at->diffForHumans(),
             ],
+            'tiposLavado' => $tiposLavado->map(fn($tipo) => [ // Mapeamos para enviar solo lo necesario
+                'id' => $tipo->id,
+                'nombre_lavado' => $tipo->nombre_lavado,
+                'precio' => $tipo->precio,
+            ]),
+            'vehiculos' => $vehiculos->map(fn($vehiculo) => [ // Mapeamos para enviar solo lo necesario
+                'id' => $vehiculo->id,
+                'patente' => $vehiculo->patente,
+                'marca' => $vehiculo->marca,
+                'modelo' => $vehiculo->modelo,
+                // Puedes añadir más campos si los necesitas para la selección
+                'display' => $vehiculo->patente . ' (' . $vehiculo->marca . ' ' . $vehiculo->modelo . ')',
+            ]),
+            'adminId' => $user->id, // ID del administrador logueado
+            'user' => $user,
         ]);
     }
 
@@ -99,7 +128,7 @@ class BoxController extends Controller
     {
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
-                            ->with('error', 'No se puede editar un box que está ocupado.');
+                ->with('error', 'No se puede editar un box que está ocupado.');
         }
         return Inertia::render('Boxes/Edit', [
             'box' => $box,
@@ -113,7 +142,7 @@ class BoxController extends Controller
     {
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
-                            ->with('error', 'No se puede actualizar un box que está ocupado.');
+                ->with('error', 'No se puede actualizar un box que está ocupado.');
         }
         $validated = $request->validate([
             'nombre_box' => 'required|string|max:255|unique:boxes,nombre_box,' . $box->id,
@@ -124,7 +153,7 @@ class BoxController extends Controller
         $box->update($validated);
 
         return redirect()->route('boxes.index')
-                        ->with('success', 'Box actualizado exitosamente.');
+            ->with('success', 'Box actualizado exitosamente.');
     }
 
     /**
@@ -134,11 +163,11 @@ class BoxController extends Controller
     {
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
-                            ->with('error', 'No se puede eliminar un box que está ocupado.');
+                ->with('error', 'No se puede eliminar un box que está ocupado.');
         }
         $box->delete();
 
         return redirect()->route('boxes.index')
-                        ->with('success', 'Box eliminado exitosamente.');
+            ->with('success', 'Box eliminado exitosamente.');
     }
 }

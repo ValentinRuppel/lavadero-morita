@@ -8,8 +8,8 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\BoxController;
-
-Route::middleware(['auth', 'verified'])->group(function () {
+use App\Http\Controllers\ServicioLavadoController;
+Route::middleware(['auth:web,admin', 'verified'])->group(function () {
     Route::get('/boxes', [BoxController::class, 'index'])->name('boxes.index');
     Route::get('/boxes/create', [BoxController::class, 'create'])->name('boxes.create');
     Route::post('/boxes', [BoxController::class, 'store'])->name('boxes.store');
@@ -17,6 +17,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/boxes/{box}/edit', [BoxController::class, 'edit'])->name('boxes.edit');
     Route::put('/boxes/{box}', [BoxController::class, 'update'])->name('boxes.update');
     Route::delete('/boxes/{box}', [BoxController::class, 'destroy'])->name('boxes.destroy');
+    Route::post('/servicios-lavado/iniciar', [ServicioLavadoController::class, 'store'])->name('servicios.iniciar');
+    Route::put('/servicios-lavado/{servicioLavado}/finalizar', [ServicioLavadoController::class, 'update'])->name('servicios.finalizar');
+    Route::post('/servicios-lavado/{servicioLavado}/cancelar', [ServicioLavadoController::class, 'cancel'])->name('servicios.cancelar'); // Ruta opcional
 });
 
 
