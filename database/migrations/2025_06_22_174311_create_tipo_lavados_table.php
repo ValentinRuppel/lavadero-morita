@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('boxes', function (Blueprint $table) {
+        Schema::create('tipo_lavados', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre_box')->unique();
+            $table->string('nombre_lavado')->unique();
             $table->text('descripcion')->nullable();
-            $table->enum('estado', ['activo', 'ocupado', 'mantenimiento'])->default('activo');
+            $table->decimal('precio', 8, 2); // 8 dígitos en total, 2 después del punto decimal
+            $table->integer('duracion_estimada')->comment('Duración en minutos'); // Duración en minutos
             $table->timestamps();
         });
     }
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('boxes');
+        Schema::dropIfExists('tipo_lavados');
     }
 };

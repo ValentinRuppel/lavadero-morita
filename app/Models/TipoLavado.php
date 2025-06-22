@@ -6,18 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Box extends Model
+class TipoLavado extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nombre_box',
+        'nombre_lavado',
         'descripcion',
-        'estado',
+        'precio',
+        'duracion_estimada',
     ];
 
     /**
-     * Un Box puede tener muchos ServiciosLavado.
+     * Un TipoLavado puede ser usado en muchos ServiciosLavado.
      */
     public function serviciosLavado(): HasMany
     {

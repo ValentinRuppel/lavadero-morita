@@ -8,63 +8,137 @@ use Inertia\Inertia;
 
 class BoxController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
     {
-        $boxes = Box::all();
+        // Obtiene todos los boxes, ordenados por nombre
+        $boxes = Box::orderBy('nombre_box')->get();
+
+        // Puedes cargar también información de servicios en curso para cada box
+        // Esto es un ejemplo, ajusta las relaciones si necesitas más datos
+        $boxes->load(['serviciosLavado' => function ($query) {
+            $query->where('estado_servicio', 'en_curso')
+                  ->with(['vehiculo', 'tipoLavado', 'administrador']); // Carga las relaciones necesarias para el servicio
+        }]);
+        $user = $request->user();
+
+        // Retorna la vista de Inertia con los datos de los boxes
         return Inertia::render('Boxes/Index', [
+            'user' => $user,
             'boxes' => $boxes->map(function ($box) {
+                // Mapea los boxes para incluir solo los servicios en curso y formatear datos
                 return [
                     'id' => $box->id,
-                    'numero' => $box->numero,
+                    'nombre_box' => $box->nombre_box,
+                    'descripcion' => $box->descripcion,
                     'estado' => $box->estado,
+                    'servicio_en_curso' => $box->serviciosLavado->first(), // Obtiene el primer servicio en curso (asumiendo uno por box)
+                    'created_at' => $box->created_at->diffForHumans(), // Formatear fechas si es necesario
+                    'updated_at' => $box->updated_at->diffForHumans(),
                 ];
             }),
         ]);
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
+        // Aquí podrías retornar la vista para crear un nuevo box
         return Inertia::render('Boxes/Create');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'numero' => 'required|string|max:255',
+        $validated = $request->validate([
+            'nombre_box' => 'required|string|max:255|unique:boxes',
+            'descripcion' => 'nullable|string|max:1000',
+            // El estado por defecto es 'disponible', no es necesario validarlo aquí si no se permite cambiarlo al crear
         ]);
 
-        Box::create([
-            'numero' => $request->numero,
-            'estado' => 'libre', // por defecto libre
-        ]);
+        Box::create($validated);
 
-        return redirect()->route('boxes.index');
+        return redirect()->route('boxes.index')
+                         ->with('success', 'Box creado exitosamente.');
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(Box $box)
     {
-        return Inertia::render('Boxes/Show', compact('box'));
+        // Carga el servicio en curso, si lo hay, con sus relaciones
+        $box->load(['serviciosLavado' => function ($query) {
+            $query->where('estado_servicio', 'en_curso')
+                ->with(['vehiculo', 'tipoLavado', 'administrador']);
+        }]);
+
+        return Inertia::render('Boxes/Show', [
+            'box' => [
+                'id' => $box->id,
+                'nombre_box' => $box->nombre_box,
+                'descripcion' => $box->descripcion,
+                'estado' => $box->estado,
+                'servicio_en_curso' => $box->serviciosLavado->first(),
+                'created_at' => $box->created_at->diffForHumans(),
+                'updated_at' => $box->updated_at->diffForHumans(),
+            ],
+        ]);
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Box $box)
     {
-        return Inertia::render('Boxes/Edit', compact('box'));
+        if ($box->estado === 'ocupado') {
+            return redirect()->route('boxes.index')
+                            ->with('error', 'No se puede editar un box que está ocupado.');
+        }
+        return Inertia::render('Boxes/Edit', [
+            'box' => $box,
+        ]);
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Box $box)
     {
+        if ($box->estado === 'ocupado') {
+            return redirect()->route('boxes.index')
+                            ->with('error', 'No se puede actualizar un box que está ocupado.');
+        }
         $validated = $request->validate([
-            'numero' => 'required',
+            'nombre_box' => 'required|string|max:255|unique:boxes,nombre_box,' . $box->id,
+            'descripcion' => 'nullable|string|max:1000',
+            'estado' => 'required|in:activo,mantenimiento',
         ]);
 
         $box->update($validated);
 
-        return redirect()->route('boxes.index');
+        return redirect()->route('boxes.index')
+                        ->with('success', 'Box actualizado exitosamente.');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Box $box)
     {
+        if ($box->estado === 'ocupado') {
+            return redirect()->route('boxes.index')
+                            ->with('error', 'No se puede eliminar un box que está ocupado.');
+        }
         $box->delete();
-        return redirect()->route('boxes.index');
+
+        return redirect()->route('boxes.index')
+                        ->with('success', 'Box eliminado exitosamente.');
     }
 }
