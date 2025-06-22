@@ -7,6 +7,19 @@ use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\VehiculoController;
+use App\Http\Controllers\BoxController;
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/boxes', [BoxController::class, 'index'])->name('boxes.index');
+    Route::get('/boxes/create', [BoxController::class, 'create'])->name('boxes.create');
+    Route::post('/boxes', [BoxController::class, 'store'])->name('boxes.store');
+    Route::get('/boxes/{box}', [BoxController::class, 'show'])->name('boxes.show');
+    Route::get('/boxes/{box}/edit', [BoxController::class, 'edit'])->name('boxes.edit');
+    Route::put('/boxes/{box}', [BoxController::class, 'update'])->name('boxes.update');
+    Route::delete('/boxes/{box}', [BoxController::class, 'destroy'])->name('boxes.destroy');
+});
+
+
 
 Route::get('/', function () {
     return Inertia::render('Bienvenido', [
@@ -41,9 +54,6 @@ Route::middleware(['auth'])->post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
-// Aquí también puedes considerar especificar los guards si es necesario para estas rutas.
-// Por ejemplo, si solo los 'web' users deben acceder a vehiculos:
-// Route::middleware(['auth:web', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vehiculos', [VehiculoController::class, 'index'])->name('vehiculos.index');
     Route::get('/vehiculos/create', [VehiculoController::class, 'create'])->name('vehiculos.create');

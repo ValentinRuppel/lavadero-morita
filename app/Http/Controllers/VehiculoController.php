@@ -232,6 +232,4 @@ class VehiculoController extends Controller
         $vehiculo->delete();
         return redirect()->route('vehiculos.index');
     }
-
-
 }
