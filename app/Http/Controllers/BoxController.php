@@ -28,6 +28,7 @@ class BoxController extends Controller
         }]);
         $user = $request->user();
         $tabla = $user->getTable();
+        
         if ($tabla === 'administrators') {
             // Retorna la vista de Inertia con los datos de los boxes
             return Inertia::render('Boxes/Index', [
@@ -80,8 +81,6 @@ class BoxController extends Controller
      */
     public function show(Box $box, Request $request)
     {
-        $user = $request->user();
-
         // 1. Carga los servicios en curso para el box
         //    Asegura cargar 'vehiculo.modelo.marca' para acceder a la marca desde el modelo del vehículo
         $box->load(['serviciosLavado' => function ($query) {
@@ -97,10 +96,13 @@ class BoxController extends Controller
                          ->has('vehiculos') // <-- ¡AGREGADO: Filtra solo clientes con vehículos!
                          ->orderBy('name')
                          ->get();
-
-        $loggedInAdminId = Auth::guard('admin')->id();
-
-        return Inertia::render('Boxes/Show', [
+        // 3. Determinar si el usuario logueado es un administrador
+        $user = $request->user();
+        $tabla = $user->getTable();
+        $isAdmin = $tabla !== 'users';
+        if($isAdmin){
+                    $loggedInAdminId = $user->id;
+                    return Inertia::render('Boxes/Show', [
             'box' => [
                 'id' => $box->id,
                 'nombre_box' => $box->nombre_box,
@@ -158,6 +160,9 @@ class BoxController extends Controller
             ]),
             'adminId' => $loggedInAdminId,
         ]);
+        }
+        return redirect()->route('dashboard');
+
     }
 
     /**
@@ -165,6 +170,7 @@ class BoxController extends Controller
      */
     public function edit(Box $box)
     {
+        dd("hola");
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
                 ->with('error', 'No se puede editar un box que está ocupado.');
