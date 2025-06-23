@@ -19,9 +19,10 @@ class ServicioLavadoController extends Controller
     {
         $user = $request->user();
         // 1. Determinar si el usuario logueado es un administrador
-        $isAdmin = Auth::guard('admin')->check();
-        $loggedInUser = Auth::user(); // Esto obtendrá el usuario logueado por el guard 'web' (cliente)
-
+        $tabla = $user->getTable();
+        
+        $isAdmin = $tabla !== 'users';
+        //dd($isAdmin);
         $query = ServicioLavado::query();
 
         // 2. Cargar ansiosamente todas las relaciones necesarias para mostrar la información
@@ -37,9 +38,9 @@ class ServicioLavadoController extends Controller
         if (!$isAdmin) {
             // Si es un cliente regular, solo mostrar sus propios servicios
             // Se filtra por el user_id del vehículo asociado al servicio.
-            if ($loggedInUser) { // Asegurarse de que haya un usuario cliente logueado
-                $query->whereHas('vehiculo', function ($q) use ($loggedInUser) {
-                    $q->where('user_id', $loggedInUser->id);
+            if ($user) { // Asegurarse de que haya un usuario cliente logueado
+                $query->whereHas('vehiculo', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
                 });
             } else {
                 // Si no hay un cliente logueado, redirigir o mostrar error
