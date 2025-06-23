@@ -1,10 +1,10 @@
 <template>
-  <div>
+<div>
     <h2 class="text-2xl font-bold">Mi Perfil</h2>
     <p>Nombre: {{ $page.props.auth.user.name }}</p>
     <p>Email: {{ $page.props.auth.user.email }}</p>
     <p>Rol: {{ $page.props.auth.user.role }}</p>
-  </div>
+</div>
 </template>
 
 <script setup>

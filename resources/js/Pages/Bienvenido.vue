@@ -59,18 +59,9 @@
                 <!-- Logo y efectos -->
                 <div class="relative mb-8">
                     <div class="absolute inset-0 bg-purple-300/20 rounded-full blur-xl animate-pulse"></div>
-                    <div
-                        class="relative bg-white/90 backdrop-blur-sm rounded-full p-6 shadow-2xl border border-purple-200/30">
-                        <img src="/storage/Logo renovado.png" alt="Morita Logo"
-                            class="w-24 h-24 rounded-full object-cover shadow-inner" v-if="logoDisponible" />
-                        <!-- Fallback si no hay logo -->
-                        <div v-else
-                            class="w-24 h-24 bg-gradient-to-br from-purple-600 to-violet-800 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-inner">
-                            🚗
-                        </div>
-                    </div>
+                    <img src="/storage/Logo_renovado.png" alt="Morita Logo"
+                        class="w-56 h-56 rounded-full object-cover shadow-inner" />
                 </div>
-
                 <!-- Título principal con efectos -->
                 <div class="mb-6">
                     <h1 class="text-5xl md:text-7xl font-black text-white mb-2 drop-shadow-lg">
@@ -86,7 +77,7 @@
 
                 <!-- Eslogan con estilo -->
                 <p class="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl font-light leading-relaxed">
-                    ✨ Cuidamos tu vehículo como si fuera nuestro ✨
+                    ¡Cuidamos tu vehículo como si fuera el nuestro!
                 </p>
 
                 <!-- Servicios destacados -->
@@ -118,7 +109,7 @@
                     <Link href="/login"
                         class="group relative bg-white text-purple-700 px-8 py-4 rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:bg-purple-50 border-2 border-purple-200/20">
                     <span class="relative z-10 flex items-center gap-2">
-                        🔑 Iniciar Sesión
+                        Iniciar Sesión
                     </span>
                     <div
                         class="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-violet-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -128,7 +119,7 @@
                     <Link href="/register"
                         class="group relative bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 border-2 border-purple-200/20">
                     <span class="relative z-10 flex items-center gap-2">
-                        ⭐ Registrarse
+                        Registrarse
                     </span>
                     <div
                         class="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -145,7 +136,7 @@
 
             <!-- Sección Quiénes Somos -->
             <section class="py-20 px-6 bg-gradient-to-b from-transparent to-purple-800/20">
-                <div class="max-w-6xl mx-auto">
+                <div class="">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
                             <span class="bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
@@ -159,23 +150,21 @@
                         <div class="space-y-6">
                             <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
                                 <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
-                                    🏆 Nuestra Historia
+                                    Lavadero Morita
                                 </h3>
                                 <p class="text-purple-100 leading-relaxed">
-                                    Desde hace más de 10 años, Morita Lavadero ha sido sinónimo de calidad y confianza
-                                    en el cuidado automotriz.
-                                    Comenzamos como un pequeño emprendimiento familiar y hoy somos referentes en la
-                                    ciudad.
+                                    Somos una empresa de lavado de vehículos habituada en Comodoro Rivadavia,
+                                    prestamos toda clase de servicios de lavado por mas de 2 años de servicio.
                                 </p>
                             </div>
 
                             <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
                                 <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
-                                    💎 Nuestra Misión
+                                    Nuestra Misión
                                 </h3>
                                 <p class="text-purple-100 leading-relaxed">
-                                    Brindar el mejor servicio de lavado y cuidado automotriz, utilizando productos
-                                    ecológicos de primera calidad
+                                    Brindar el mejor servicio de lavado y cuidado automotriz, prestamos los mejores
+                                    productos
                                     y un equipo altamente capacitado para superar las expectativas de nuestros clientes.
                                 </p>
                             </div>
@@ -184,23 +173,23 @@
                         <div class="space-y-6">
                             <div
                                 class="bg-gradient-to-br from-purple-600/20 to-violet-600/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
-                                <h3 class="text-2xl font-bold text-white mb-6 text-center">🎯 Nuestros Valores</h3>
+                                <h3 class="text-2xl font-bold text-white mb-6 text-center">Somos...</h3>
                                 <div class="space-y-4">
                                     <div class="flex items-center gap-4">
                                         <div
                                             class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-2xl">
-                                            🤝</div>
+                                            1</div>
                                         <div>
-                                            <h4 class="font-bold text-white">Confianza</h4>
+                                            <h4 class="font-bold text-white">Confiables</h4>
                                             <p class="text-purple-200 text-sm">Tu vehículo está en las mejores manos</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-4">
                                         <div
                                             class="w-12 h-12 bg-violet-500 rounded-full flex items-center justify-center text-2xl">
-                                            ⚡</div>
+                                            2</div>
                                         <div>
-                                            <h4 class="font-bold text-white">Eficiencia</h4>
+                                            <h4 class="font-bold text-white">Eficientes</h4>
                                             <p class="text-purple-200 text-sm">Servicio rápido sin comprometer la
                                                 calidad</p>
                                         </div>
@@ -208,11 +197,10 @@
                                     <div class="flex items-center gap-4">
                                         <div
                                             class="w-12 h-12 bg-fuchsia-500 rounded-full flex items-center justify-center text-2xl">
-                                            🌱</div>
+                                            3</div>
                                         <div>
-                                            <h4 class="font-bold text-white">Sostenibilidad</h4>
-                                            <p class="text-purple-200 text-sm">Productos ecológicos que cuidan el medio
-                                                ambiente</p>
+                                            <h4 class="font-bold text-white">Profesionales</h4>
+                                            <p class="text-purple-200 text-sm">Nuestro servicio consta de todos </p>
                                         </div>
                                     </div>
                                 </div>
@@ -237,11 +225,10 @@
                     <div class="grid md:grid-cols-3 gap-8">
                         <div
                             class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
-                            <div class="text-5xl mb-4 text-center">🚿</div>
-                            <h3 class="text-xl font-bold text-white mb-4 text-center">Lavado Express</h3>
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Motos</h3>
                             <ul class="text-purple-100 space-y-2 mb-6">
-                                <li>• Lavado exterior completo</li>
-                                <li>• Secado con toallas de microfibra</li>
+                                <li>• Hidrolabadora</li>
+                                <li>• Trapos, esponjas y productos de limpieza</li>
                                 <li>• Limpieza de llantas</li>
                                 <li>• 15-20 minutos</li>
                             </ul>
@@ -252,97 +239,32 @@
 
                         <div
                             class="bg-gradient-to-br from-purple-600/20 to-violet-700/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/30 hover:transform hover:scale-105 transition-all duration-300 ring-2 ring-purple-400/50">
-                            <div class="text-5xl mb-4 text-center">⭐</div>
-                            <h3 class="text-xl font-bold text-white mb-4 text-center">Lavado Premium</h3>
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Autos</h3>
                             <ul class="text-purple-100 space-y-2 mb-6">
-                                <li>• Todo lo del Express</li>
-                                <li>• Lavado interior completo</li>
-                                <li>• Aspirado profundo</li>
-                                <li>• Aromatización</li>
-                                <li>• Limpieza de tablero</li>
-                                <li>• 30-40 minutos</li>
+                                <li>• Hidrolabadora y enceradora</li>
+                                <li>• Productos para lavado interior</li>
+                                <li>• Aspiradora</li>
+                                <li>• Aromatizador gratis</li>
+                                <li>• 20-30 minutos</li>
                             </ul>
                             <div class="text-center">
                                 <span class="text-2xl font-bold text-purple-200">$4,500</span>
-                                <div class="text-xs text-purple-300 mt-1">⭐ MÁS POPULAR</div>
                             </div>
                         </div>
 
                         <div
                             class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
-                            <div class="text-5xl mb-4 text-center">💎</div>
-                            <h3 class="text-xl font-bold text-white mb-4 text-center">Detailing Complete</h3>
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Camionetas</h3>
+                            <h4 class="text-xl font-bold text-white mb-4 text-center">!Todo el espacio necesario!</h4>
                             <ul class="text-purple-100 space-y-2 mb-6">
-                                <li>• Todo lo del Premium</li>
-                                <li>• Encerado profesional</li>
-                                <li>• Pulido de carrocería</li>
-                                <li>• Tratamiento de cueros</li>
-                                <li>• Limpieza motor (opcional)</li>
-                                <li>• 60-90 minutos</li>
+                                <li>• Hidrolabadora y enceradora</li>
+                                <li>• Productos para lavado interior</li>
+                                <li>• Aspiradora</li>
+                                <li>• Aromatizador gratis</li>
+                                <li>• 30-40 minutos</li>
                             </ul>
                             <div class="text-center">
                                 <span class="text-2xl font-bold text-purple-200">$8,000</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Sección Por Qué Elegirnos -->
-            <section class="py-20 px-6 bg-gradient-to-b from-transparent to-purple-900/30">
-                <div class="max-w-4xl mx-auto text-center">
-                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-12">
-                        <span class="bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
-                            ¿Por Qué Elegirnos?
-                        </span>
-                    </h2>
-
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div
-                                    class="w-16 h-16 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center text-2xl">
-                                    🛡️</div>
-                                <div class="text-left">
-                                    <h3 class="text-xl font-bold text-white">Garantía Total</h3>
-                                    <p class="text-purple-200">Si no quedas satisfecho, lo volvemos a hacer gratis</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div
-                                    class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-2xl">
-                                    🌟</div>
-                                <div class="text-left">
-                                    <h3 class="text-xl font-bold text-white">Productos Premium</h3>
-                                    <p class="text-purple-200">Utilizamos las mejores marcas del mercado</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div
-                                    class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-full flex items-center justify-center text-2xl">
-                                    ⏰</div>
-                                <div class="text-left">
-                                    <h3 class="text-xl font-bold text-white">Horarios Flexibles</h3>
-                                    <p class="text-purple-200">Abierto de lunes a domingo, de 8:00 a 20:00</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div
-                                    class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-2xl">
-                                    📱</div>
-                                <div class="text-left">
-                                    <h3 class="text-xl font-bold text-white">Sistema Online</h3>
-                                    <p class="text-purple-200">Reserva tu turno desde cualquier lugar</p>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -353,19 +275,19 @@
             <footer class="py-12 px-6 bg-gradient-to-t from-purple-900 to-transparent">
                 <div class="max-w-4xl mx-auto text-center">
                     <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20">
-                        <h3 class="text-2xl font-bold text-white mb-6">📍 Visitanos</h3>
+                        <h3 class="text-2xl font-bold text-white mb-6">Visitanos</h3>
                         <div class="grid md:grid-cols-3 gap-6 text-purple-100">
                             <div>
-                                <h4 class="font-bold text-white mb-2">📞 Teléfono</h4>
-                                <p>+54 297 XXX-XXXX</p>
+                                <h4 class="font-bold text-white mb-2">Teléfono</h4>
+                                <p>+54 297 507-4502</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-white mb-2">📧 Email</h4>
-                                <p>info@moritastavadero.com</p>
+                                <h4 class="font-bold text-white mb-2">Email</h4>
+                                <p>info@moritaslavadero.com</p>
                             </div>
                             <div>
-                                <h4 class="font-bold text-white mb-2">📍 Dirección</h4>
-                                <p>Av. Principal 123<br>Comodoro Rivadavia</p>
+                                <h4 class="font-bold text-white mb-2">Dirección</h4>
+                                <p>Rivadavia 513<br>Comodoro Rivadavia</p>
                             </div>
                         </div>
                     </div>
