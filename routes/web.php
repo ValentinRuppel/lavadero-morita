@@ -9,7 +9,16 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\BoxController;
 use App\Http\Controllers\ServicioLavadoController;
+
 Route::middleware(['auth:web,admin', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Rutas para Boxes (para administradores)
+    // Asumimos que los Boxes solo son gestionados por Admins
     Route::get('/boxes', [BoxController::class, 'index'])->name('boxes.index');
     Route::get('/boxes/create', [BoxController::class, 'create'])->name('boxes.create');
     Route::post('/boxes', [BoxController::class, 'store'])->name('boxes.store');
@@ -17,9 +26,13 @@ Route::middleware(['auth:web,admin', 'verified'])->group(function () {
     Route::get('/boxes/{box}/edit', [BoxController::class, 'edit'])->name('boxes.edit');
     Route::put('/boxes/{box}', [BoxController::class, 'update'])->name('boxes.update');
     Route::delete('/boxes/{box}', [BoxController::class, 'destroy'])->name('boxes.destroy');
-    Route::post('/servicios-lavado/iniciar', [ServicioLavadoController::class, 'store'])->name('servicios.iniciar');
-    Route::put('/servicios-lavado/{servicioLavado}/finalizar', [ServicioLavadoController::class, 'update'])->name('servicios.finalizar');
-    Route::post('/servicios-lavado/{servicioLavado}/cancelar', [ServicioLavadoController::class, 'cancel'])->name('servicios.cancelar'); // Ruta opcional
+
+    // Rutas para Servicios de Lavado
+    Route::get('/servicios', [ServicioLavadoController::class, 'index'])->name('servicios.index');
+    Route::post('/servicios/iniciar', [ServicioLavadoController::class, 'store'])->name('servicios.iniciar');
+    Route::put('/servicios/{servicioLavado}/finalizar', [ServicioLavadoController::class, 'finalizar'])->name('servicios.finalizar');
+    Route::post('/servicios/{servicioLavado}/cancelar', [ServicioLavadoController::class, 'cancelar'])->name('servicios.cancelar');
+    Route::patch('/servicios/{servicioLavado}/extender', [ServicioLavadoController::class, 'extender'])->name('servicios.extender'); // ¡Nueva ruta!
 });
 
 
@@ -41,10 +54,6 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->get('/perfil', function () {
     return Inertia::render('Profile/Edit');
 })->name('profile.edit');
-
-// --- MODIFICACIÓN IMPORTANTE AQUÍ ---
-// Especifica que la ruta 'dashboard' debe permitir la autenticación con los guards 'web' o 'admin'
-Route::middleware(['auth:web,admin', 'verified'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::middleware(['auth'])->post('/logout', function () {
     // Es buena práctica desloguear de todos los guards explícitamente

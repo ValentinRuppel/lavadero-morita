@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Box;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\User; // Para los clientes
 use App\Models\TipoLavado; // ¡Importa el modelo TipoLavado!
 use App\Models\Vehiculo; // ¡Importa el modelo Vehiculo! (Si vas a permitir registrarlo en el mismo formulario)
 use Illuminate\Support\Facades\Auth; // Para obtener el administrador logueado
@@ -79,19 +80,25 @@ class BoxController extends Controller
      */
     public function show(Box $box, Request $request)
     {
-        // Carga el servicio en curso, si lo hay, con sus relaciones
+        $user = $request->user();
+
+        // 1. Carga los servicios en curso para el box
+        //    Asegura cargar 'vehiculo.modelo.marca' para acceder a la marca desde el modelo del vehículo
         $box->load(['serviciosLavado' => function ($query) {
             $query->where('estado_servicio', 'en_curso')
-                ->with(['vehiculo', 'tipoLavado', 'administrador']);
+                  ->with(['vehiculo.user', 'vehiculo.tipoVehiculo','vehiculo.modelo.marca', 'tipoLavado', 'administrador']); // Asegura cargar tipoVehiculo
         }]);
 
-        // Obtener todos los tipos de lavado disponibles
         $tiposLavado = TipoLavado::orderBy('nombre_lavado')->get();
 
-        // Puedes obtener una lista de vehículos existentes si el usuario va a seleccionarlos
-        // O si vas a permitir registrar uno nuevo en el momento, esta lista podría ser para "vehículos frecuentes"
-        $vehiculos = Vehiculo::orderBy('patente')->get(); // O solo los más recientes, o con paginación
-        $user = $request->user();
+        // 2. Cargar los clientes y sus vehículos, y las relaciones necesarias de los vehículos
+        //    Asegura cargar solo clientes que tienen al menos un vehículo
+        $clientes = User::with(['vehiculos.modelo.marca', 'vehiculos.tipoVehiculo'])
+                         ->has('vehiculos') // <-- ¡AGREGADO: Filtra solo clientes con vehículos!
+                         ->orderBy('name')
+                         ->get();
+
+        $loggedInAdminId = Auth::guard('admin')->id();
 
         return Inertia::render('Boxes/Show', [
             'box' => [
@@ -99,25 +106,57 @@ class BoxController extends Controller
                 'nombre_box' => $box->nombre_box,
                 'descripcion' => $box->descripcion,
                 'estado' => $box->estado,
-                'servicio_en_curso' => $box->serviciosLavado->first(),
+                'servicio_en_curso' => $box->serviciosLavado->first() ? [
+                    'id' => $box->serviciosLavado->first()->id,
+                    'vehiculo' => $box->serviciosLavado->first()->vehiculo ? [
+                        'id' => $box->serviciosLavado->first()->vehiculo->id,
+                        'patente' => $box->serviciosLavado->first()->vehiculo->patente,
+                        'marca' => $box->serviciosLavado->first()->vehiculo->modelo->marca->nombre ?? $box->serviciosLavado->first()->vehiculo->marca,
+                        'modelo' => $box->serviciosLavado->first()->vehiculo->modelo->nombre ?? $box->serviciosLavado->first()->vehiculo->modelo,
+                        'anio' => $box->serviciosLavado->first()->vehiculo->anio,
+                        'cliente_nombre' => $box->serviciosLavado->first()->vehiculo->user->name ?? 'N/A',
+                        'tipo_vehiculo_precio' => $box->serviciosLavado->first()->vehiculo->tipoVehiculo->precio ?? 0,
+                    ] : null,
+                    'tipo_lavado' => $box->serviciosLavado->first()->tipoLavado ? [
+                        'id' => $box->serviciosLavado->first()->tipoLavado->id,
+                        'nombre_lavado' => $box->serviciosLavado->first()->tipoLavado->nombre_lavado,
+                        'precio' => $box->serviciosLavado->first()->tipoLavado->precio,
+                        'duracion_estimada' => $box->serviciosLavado->first()->tipoLavado->duracion_estimada,
+                    ] : null,
+                    'administrador' => $box->serviciosLavado->first()->administrador ? [
+                        'id' => $box->serviciosLavado->first()->administrador->id,
+                        'name' => $box->serviciosLavado->first()->administrador->name,
+                    ] : null,
+                    'fecha_hora_inicio' => $box->serviciosLavado->first()->fecha_hora_inicio,
+                    'precio_total_servicio' => $box->serviciosLavado->first()->precio_total_servicio,
+                    'estado_servicio' => $box->serviciosLavado->first()->estado_servicio,
+                ] : null,
                 'created_at' => $box->created_at->diffForHumans(),
                 'updated_at' => $box->updated_at->diffForHumans(),
             ],
-            'tiposLavado' => $tiposLavado->map(fn($tipo) => [ // Mapeamos para enviar solo lo necesario
+            'tiposLavado' => $tiposLavado->map(fn($tipo) => [
                 'id' => $tipo->id,
                 'nombre_lavado' => $tipo->nombre_lavado,
                 'precio' => $tipo->precio,
+                'duracion_estimada' => $tipo->duracion_estimada,
             ]),
-            'vehiculos' => $vehiculos->map(fn($vehiculo) => [ // Mapeamos para enviar solo lo necesario
-                'id' => $vehiculo->id,
-                'patente' => $vehiculo->patente,
-                'marca' => $vehiculo->marca,
-                'modelo' => $vehiculo->modelo,
-                // Puedes añadir más campos si los necesitas para la selección
-                'display' => $vehiculo->patente . ' (' . $vehiculo->marca . ' ' . $vehiculo->modelo . ')',
-            ]),
-            'adminId' => $user->id, // ID del administrador logueado
             'user' => $user,
+            'clientes' => $clientes->map(fn($cliente) => [
+                'id' => $cliente->id,
+                'name' => $cliente->name,
+                'email' => $cliente->email,
+                'vehiculos' => $cliente->vehiculos->map(fn($v) => [
+                    'id' => $v->id,
+                    'patente' => $v->patente,
+                    'marca' => $v->marca, // Esta es la marca directa del vehículo, el 'display' usa la del modelo
+                    'modelo' => $v->modelo, // Este es el modelo directo del vehículo, el 'display' usa la del modelo
+                    'anio' => $v->anio,
+                    'display' => $v->patente . ' ' . ($v->modelo->marca->nombre ?? $v->marca) . ' ' . ($v->modelo->nombre ?? $v->modelo) . ' ' . $v->anio,
+                    'tipo_vehiculo_id' => $v->tipo_vehiculo_id,
+                    'tipo_vehiculo_precio' => $v->tipoVehiculo->precio ?? 0,
+                ])->toArray(),
+            ]),
+            'adminId' => $loggedInAdminId,
         ]);
     }
 

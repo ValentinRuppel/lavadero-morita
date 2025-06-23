@@ -26,37 +26,27 @@ class ServicioLavado extends Model
         'fecha_hora_fin' => 'datetime',
     ];
 
-    /**
-     * Un ServicioLavado pertenece a un Box.
-     */
     public function box(): BelongsTo
     {
         return $this->belongsTo(Box::class);
     }
 
-    /**
-     * Un ServicioLavado pertenece a un Vehiculo.
-     * Asegúrate de que el modelo Vehiculo exista.
-     */
     public function vehiculo(): BelongsTo
     {
-        return $this->belongsTo(Vehiculo::class); // Asegúrate de tener este modelo
+        return $this->belongsTo(Vehiculo::class);
     }
 
-    /**
-     * Un ServicioLavado pertenece a un TipoLavado.
-     */
     public function tipoLavado(): BelongsTo
     {
         return $this->belongsTo(TipoLavado::class);
     }
 
     /**
-     * Un ServicioLavado es asignado por un Administrador (User).
-     * Asegúrate de que el modelo User exista y represente a tus administradores.
+     * Un ServicioLavado es asignado por un Administrador.
+     * Ahora apuntamos al modelo Administrator.
      */
     public function administrador(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'administrador_id'); // Usa 'User' si tus admins están ahí, o el modelo que uses
+        return $this->belongsTo(Administrator::class, 'administrador_id'); // ¡CAMBIO AQUÍ!
     }
 }
