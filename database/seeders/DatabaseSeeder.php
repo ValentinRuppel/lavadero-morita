@@ -15,7 +15,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TipoVehiculoSeeder::class,
             MarcaModeloSeeder::class,
-            AdministratorSeeder::class, // Para administradores
+            AdministratorSeeder::class,
+            TiposLavadoSeeder::class,
         ]);
     }
 }

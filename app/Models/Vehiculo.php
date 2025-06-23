@@ -11,12 +11,10 @@ class Vehiculo extends Model
 
     protected $fillable = [
         'user_id',
-        'tipo_vehiculo_id', // Si todavía la usas, manténla
-        'modelo_id',       // <-- ¡Añade esta línea!
-        'marca',           // <-- Si quieres guardar la marca directamente en Vehiculo, añádelo aquí
-                           //     (aunque lo obtendremos del modelo ahora)
-        'modelo',          // <-- Si quieres guardar el modelo directamente en Vehiculo, añádelo aquí
-                           //     (aunque lo obtendremos del modelo ahora)
+        'tipo_vehiculo_id',
+        'modelo_id',
+        'marca',
+        'modelo',
         'patente',
         'anio',
     ];

@@ -53,20 +53,26 @@ class VehiculoController extends Controller
      * @return \Inertia\Response
      */
     public function create(Request $request)
-    {
-        $user = $request->user();
+        {
+            // Obtener el user_id de los parámetros de la URL si existe
+            $selectedUserId = $request->query('user_id');
+            $selectedUserName = $request->query('user_name'); // Opcional
 
-        // No pasamos clientes, ya que el usuario autenticado será el dueño
-        $tiposVehiculo = TipoVehiculo::orderBy('nombre')->get(['id', 'nombre', 'precio']);
-        $marcas = Marca::orderBy('nombre')->get(['id', 'nombre']); // <-- Pasa las marcas
+            // Puedes obtener el cliente si es necesario para validación o mostrar más datos
+            $selectedUser = null;
+            if ($selectedUserId) {
+                $selectedUser = User::find($selectedUserId);
+            }
 
-        return Inertia::render('Vehiculos/Create', [
-            'user' => $user,
-            'tiposVehiculo' => $tiposVehiculo,
-            'marcas' => $marcas, // <-- Pasa las marcas al frontend
-            // No pasamos 'clientes'
-        ]);
-    }
+            return Inertia::render('Vehiculos/Create', [
+                'tiposVehiculos' => TipoVehiculo::all(),
+                'marcas' => Marca::all(), // Asegúrate de pasar las marcas para el select
+                'clientes' => User::orderBy('name')->get(['id', 'name']), // Pasa la lista de clientes para el select
+                'selectedUserId' => $selectedUserId, // Pasa el ID del cliente al frontend
+                'selectedUserName' => $selectedUserName, // Pasa el nombre para un mensaje
+                'isAdminContext' => Auth::guard('administrators')->check(), // Indica si la sesión es de admin
+            ]);
+        }
 
     /**
      * Store a newly created resource in storage.
@@ -76,27 +82,44 @@ class VehiculoController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            // 'marca' y 'modelo' ya no son directos, ahora usamos 'modelo_id'
-            'modelo_id' => ['required', 'exists:modelos,id'], // Validar que el modelo exista
-            'anio' => ['required', 'integer', 'min:1900', 'max:' . date('Y')], // Año hasta el actual
-            'patente' => ['required', 'string', 'max:20', \Illuminate\Validation\Rule::unique('vehiculos', 'patente')],
-            // 'color' ya no se valida
+        $validated = $request->validate([
+            // user_id ahora puede ser opcional si el admin lo está agregando desde un contexto general,
+            // pero requerido si viene de una redirección de cliente sin vehículo.
+            // La validación en el frontend de Show.vue ya asegura que mandamos un user_id válido.
+            // Aquí, lo hacemos nullable y luego asignamos si existe.
+            'user_id' => ['nullable', 'exists:users,id'],
             'tipo_vehiculo_id' => ['required', 'exists:tipos_vehiculos,id'],
-            // 'user_id' ya no se valida aquí, se asigna automáticamente
+            'marca' => ['required', 'string', 'max:255'],
+            'modelo' => ['required', 'string', 'max:255'],
+            'patente' => ['required', 'string', 'max:20', 'unique:vehiculos,patente'],
+            'anio' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            // 'modelo_id' => ['nullable', 'exists:modelos,id'], // Si usas Modelo ID
         ]);
 
-        Vehiculo::create([
-            'user_id' => Auth::id(), // <-- Asignar automáticamente el ID del usuario logueado
-            'modelo_id' => $request->modelo_id,
-            'tipo_vehiculo_id' => $request->tipo_vehiculo_id,
-            'patente' => $request->patente,
-            // 'color' ya no se guarda
-            'anio' => $request->anio,
-        ]);
+        // Determinar el user_id. Priorizar el user_id de la solicitud,
+        // de lo contrario, usar el user_id del usuario autenticado si es un cliente.
+        // Asumimos que los administradores pueden registrar vehículos para cualquier user_id,
+        // y que los clientes solo registran para sí mismos (si tuvieran acceso a este formulario).
+        $userIdToAssign = $validated['user_id'] ?? null;
 
-        return redirect()->route('vehiculos.index')
-                         ->with('success', 'Vehículo registrado exitosamente.'); // Cambiado a "Registrado"
+        // Si no se proporcionó user_id en el formulario y hay un usuario logueado
+        // (y si tu sistema permitiera a los usuarios regulares registrar sus propios vehículos),
+        // podrías usar Auth::id() aquí.
+        // Pero dado que los administradores son quienes lo hacen, confiaremos en 'user_id' del request.
+        if (is_null($userIdToAssign) && Auth::check()) { // Si un cliente logueado usa esto
+             $userIdToAssign = Auth::id();
+        }
+
+        // Si no hay user_id para asignar, puedes lanzar un error o redirigir
+        if (is_null($userIdToAssign)) {
+            return redirect()->back()->withErrors(['user_id' => 'Debe seleccionarse un cliente para asignar el vehículo.']);
+        }
+
+        // Crear el vehículo con el user_id asignado
+        $vehiculo = Vehiculo::create(array_merge($validated, ['user_id' => $userIdToAssign]));
+
+        return redirect()->route('vehiculos.index') // O a la página del cliente si tienes una
+            ->with('success', 'Vehículo registrado exitosamente.');
     }
 
     /**
