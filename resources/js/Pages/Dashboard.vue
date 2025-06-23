@@ -22,8 +22,9 @@ defineProps({
         </Link>
       </p>
 
-      <Link :href="route('vehiculos.index')" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        Ir a Mis Vehículos
+      <Link :href="route('servicios.index')"
+          class="flex items-center justify-center p-6 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105">
+          <span class="text-lg font-bold">Ver Mis Servicios</span>
       </Link>
 
       <div class="mt-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">

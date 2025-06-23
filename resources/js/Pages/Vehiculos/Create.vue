@@ -1,197 +1,157 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { useForm, Head } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue'; // Importa 'computed'
-import axios from 'axios';
+import InputError from '@/Components/InputError.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, watch } from 'vue'; // Asegúrate de importar 'watch' si lo necesitas
 
 const props = defineProps({
-    user: Object,
-    tiposVehiculo: Array, // Lista de todos los tipos de vehículo
-    marcas: Array,        // Lista de todas las marcas
+    tiposVehiculos: Array,
+    marcas: Array, // Asegúrate de que esto se pase
+    clientes: Array, // Para el select de clientes
+    selectedUserId: [Number, String, null], // Nuevo prop para el ID del cliente
+    selectedUserName: [String, null], // Nuevo prop para el nombre del cliente (opcional)
+    isAdminContext: Boolean, // Nuevo prop para saber si es un admin logueado
 });
 
 const form = useForm({
-    modelo_id: '',
+    user_id: props.selectedUserId || '', // Precarga el user_id si viene de props
+    tipo_vehiculo_id: '',
+    marca: '',
+    modelo: '',
     patente: '',
     anio: '',
-    tipo_vehiculo_id: '', // Este campo se llenará automáticamente
+    // modelo_id: '', // Si lo usas
 });
 
-const modelosDisponibles = ref([]);
-const marcaSeleccionada = ref('');
-const modeloSeleccionadoObjeto = ref(null); // <-- Nuevo: para guardar el objeto del modelo seleccionado
+// Variable reactiva para el mensaje inicial
+const initialMessage = ref('');
 
-// Watcher para la marca seleccionada: carga los modelos
-watch(marcaSeleccionada, async (newMarcaId) => {
-    modelosDisponibles.value = [];
-    form.modelo_id = '';
-    form.tipo_vehiculo_id = ''; // Limpiar tipo si cambia la marca
-    modeloSeleccionadoObjeto.value = null; // Limpiar objeto modelo
-
-    if (newMarcaId) {
-        try {
-            const response = await axios.get(route('vehiculos.modelosByMarca'), {
-                params: {
-                    marca_id: newMarcaId
-                }
-            });
-            modelosDisponibles.value = response.data;
-        } catch (error) {
-            console.error('Error al cargar modelos:', error);
-        }
-    }
-});
-
-// Watcher para el modelo seleccionado: asigna el tipo de vehículo
-watch(() => form.modelo_id, (newModeloId) => {
-    if (newModeloId) {
-        // Encuentra el objeto modelo completo de los modelos disponibles
-        const selectedModel = modelosDisponibles.value.find(modelo => modelo.id === newModeloId);
-        if (selectedModel && selectedModel.tipo_vehiculo_id) {
-            form.tipo_vehiculo_id = selectedModel.tipo_vehiculo_id;
-            modeloSeleccionadoObjeto.value = selectedModel; // Guarda el objeto modelo para futuras referencias
-        } else {
-            form.tipo_vehiculo_id = ''; // Si el modelo no tiene tipo o no se encuentra
-            modeloSeleccionadoObjeto.value = null;
-        }
-    } else {
-        form.tipo_vehiculo_id = ''; // Si no hay modelo seleccionado
-        modeloSeleccionadoObjeto.value = null;
-    }
-});
-
-// Opcional: Propiedad computada para mostrar el nombre del tipo de vehículo seleccionado automáticamente
-const tipoVehiculoAutoSeleccionadoNombre = computed(() => {
-    if (form.tipo_vehiculo_id) {
-        const tipo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
-        return tipo ? `${tipo.nombre} ($${tipo.precio})` : 'Cargando...';
-    }
-    return 'Selecciona un modelo para auto-seleccionar';
-});
+// Si el selectedUserId viene, muestra un mensaje
+if (props.selectedUserId && props.selectedUserName) {
+    initialMessage.value = `Registrando un nuevo vehículo para ${props.selectedUserName}. Por favor, complete los datos.`;
+} else if (props.selectedUserId) {
+    initialMessage.value = `Registrando un nuevo vehículo para un cliente. Por favor, complete los datos.`;
+} else if (props.isAdminContext) {
+    initialMessage.value = `Registre un nuevo vehículo y asócielo a un cliente.`;
+} else {
+    // Podrías tener una lógica diferente si el propio cliente puede acceder a esta página
+    initialMessage.value = `Registre su nuevo vehículo.`;
+}
 
 
 const submit = () => {
     form.post(route('vehiculos.store'), {
-        onSuccess: () => {
-            form.reset();
-            marcaSeleccionada.value = ''; // Resetear también la marca seleccionada
-            modelosDisponibles.value = []; // Limpiar modelos
-            modeloSeleccionadoObjeto.value = null;
-        },
-        onError: (errors) => {
-            console.error('Error al registrar el vehículo:', errors);
-        }
+        onSuccess: () => form.reset(),
     });
 };
 
-const getCurrentYear = () => {
-    return new Date().getFullYear();
-};
+// ... (posibles watches para modelos si los tienes)
+
 </script>
 
 <template>
-    <AppLayout title="Registrar Vehículo" :user="user">
+    <AppLayout title="Registrar Vehículo">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Registrar Nuevo Vehículo
-            </h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Registrar Nuevo Vehículo</h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+                    <div v-if="initialMessage" class="mb-4 text-blue-600 font-semibold">
+                        {{ initialMessage }}
+                    </div>
+
                     <form @submit.prevent="submit">
-                        <div v-if="$page.props.flash && $page.props.flash.success" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                            <p class="font-bold">Éxito</p>
-                            <p>{{ $page.props.flash.success }}</p>
-                        </div>
-                        <div v-if="$page.props.flash && $page.props.flash.error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                            <p class="font-bold">Error</p>
-                            <p>{{ $page.props.flash.error }}</p>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="marca_seleccionada" class="block text-gray-700 text-sm font-bold mb-2">Marca:</label>
+                        <div class="mb-4" v-if="!form.user_id">
+                            <InputLabel for="user_id" value="Asignar a Cliente" />
                             <select
-                                id="marca_seleccionada"
-                                v-model="marcaSeleccionada"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                id="user_id"
+                                class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full"
+                                v-model="form.user_id"
                                 required
                             >
-                                <option value="" disabled>Selecciona una marca</option>
-                                <option v-for="marca in props.marcas" :key="marca.id" :value="marca.id">
-                                    {{ marca.nombre }}
+                                <option value="">Seleccione un cliente</option>
+                                <option v-for="cliente in props.clientes" :key="cliente.id" :value="cliente.id">
+                                    {{ cliente.name }}
                                 </option>
                             </select>
-                            <div v-if="form.errors.marca_seleccionada" class="text-red-500 text-xs mt-1">{{ form.errors.marca_seleccionada }}</div>
+                            <InputError class="mt-2" :message="form.errors.user_id" />
                         </div>
+                        <input type="hidden" v-model="form.user_id" />
+
 
                         <div class="mb-4">
-                            <label for="modelo_id" class="block text-gray-700 text-sm font-bold mb-2">Modelo:</label>
+                            <InputLabel for="tipo_vehiculo_id" value="Tipo de Vehículo" />
                             <select
-                                id="modelo_id"
-                                v-model="form.modelo_id"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                :disabled="!marcaSeleccionada || modelosDisponibles.length === 0"
+                                id="tipo_vehiculo_id"
+                                class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full"
+                                v-model="form.tipo_vehiculo_id"
                                 required
                             >
-                                <option value="" disabled>Selecciona un modelo</option>
-                                <option v-if="!marcaSeleccionada" value="" disabled>Selecciona una marca primero</option>
-                                <option v-if="marcaSeleccionada && modelosDisponibles.length === 0" value="" disabled>No hay modelos para esta marca</option>
-                                <option v-for="modelo in modelosDisponibles" :key="modelo.id" :value="modelo.id">
-                                    {{ modelo.nombre }}
+                                <option value="">Seleccione un tipo</option>
+                                <option v-for="tipo in props.tiposVehiculos" :key="tipo.id" :value="tipo.id">
+                                    {{ tipo.nombre }}
                                 </option>
                             </select>
-                            <div v-if="form.errors.modelo_id" class="text-red-500 text-xs mt-1">{{ form.errors.modelo_id }}</div>
+                            <InputError class="mt-2" :message="form.errors.tipo_vehiculo_id" />
                         </div>
 
                         <div class="mb-4">
-                            <label for="patente" class="block text-gray-700 text-sm font-bold mb-2">Patente:</label>
-                            <input
+                            <InputLabel for="marca" value="Marca" />
+                            <TextInput
+                                id="marca"
+                                type="text"
+                                class="mt-1 block w-full"
+                                v-model="form.marca"
+                                required
+                                autofocus
+                            />
+                            <InputError class="mt-2" :message="form.errors.marca" />
+                        </div>
+
+                        <div class="mb-4">
+                            <InputLabel for="modelo" value="Modelo" />
+                            <TextInput
+                                id="modelo"
+                                type="text"
+                                class="mt-1 block w-full"
+                                v-model="form.modelo"
+                                required
+                            />
+                            <InputError class="mt-2" :message="form.errors.modelo" />
+                        </div>
+
+                        <div class="mb-4">
+                            <InputLabel for="patente" value="Patente" />
+                            <TextInput
                                 id="patente"
                                 type="text"
+                                class="mt-1 block w-full"
                                 v-model="form.patente"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             />
-                            <div v-if="form.errors.patente" class="text-red-500 text-xs mt-1">{{ form.errors.patente }}</div>
+                            <InputError class="mt-2" :message="form.errors.patente" />
                         </div>
 
                         <div class="mb-4">
-                            <label for="anio" class="block text-gray-700 text-sm font-bold mb-2">Año:</label>
-                            <input
+                            <InputLabel for="anio" value="Año (Opcional)" />
+                            <TextInput
                                 id="anio"
                                 type="number"
+                                class="mt-1 block w-full"
                                 v-model="form.anio"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                :max="getCurrentYear()"
-                                min="1900"
-                                required
                             />
-                            <div v-if="form.errors.anio" class="text-red-500 text-xs mt-1">{{ form.errors.anio }}</div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="tipo_vehiculo_id" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Vehículo:</label>
-                            <input type="hidden" name="tipo_vehiculo_id" v-model="form.tipo_vehiculo_id" />
-                            <input
-                                type="text"
-                                :value="tipoVehiculoAutoSeleccionadoNombre"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed"
-                                readonly
-                                :disabled="!form.tipo_vehiculo_id"
-                            />
-                            <div v-if="form.errors.tipo_vehiculo_id" class="text-red-500 text-xs mt-1">{{ form.errors.tipo_vehiculo_id }}</div>
+                            <InputError class="mt-2" :message="form.errors.anio" />
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
-                            <button
-                                type="submit"
-                                :disabled="form.processing || !form.modelo_id || !form.tipo_vehiculo_id"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            >
-                                {{ form.processing ? 'Registrando...' : 'Registrar Vehículo' }}
-                            </button>
+                            <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                Registrar Vehículo
+                            </PrimaryButton>
                         </div>
                     </form>
                 </div>

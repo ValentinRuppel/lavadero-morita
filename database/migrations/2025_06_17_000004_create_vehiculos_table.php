@@ -18,7 +18,6 @@ class CreateVehiculosTable extends Migration
             $table->foreignId('modelo_id')->nullable()->constrained('modelos')->onDelete('set null');
             $table->integer('anio')->nullable();
             $table->string('patente')->unique();
-
             $table->foreignId('tipo_vehiculo_id')->constrained('tipos_vehiculos')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
 
