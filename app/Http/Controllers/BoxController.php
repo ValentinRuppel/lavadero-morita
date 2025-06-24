@@ -28,7 +28,7 @@ class BoxController extends Controller
         }]);
         $user = $request->user();
         $tabla = $user->getTable();
-        
+
         if ($tabla === 'administrators') {
             // Retorna la vista de Inertia con los datos de los boxes
             return Inertia::render('Boxes/Index', [
@@ -170,7 +170,6 @@ class BoxController extends Controller
      */
     public function edit(Box $box)
     {
-        dd("hola");
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
                 ->with('error', 'No se puede editar un box que está ocupado.');

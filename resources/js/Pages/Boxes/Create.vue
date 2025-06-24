@@ -4,7 +4,11 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link, router } from '@inertiajs/vue3';
+
+const props = defineProps({
+    user: Object
+});
 
 const form = useForm({
     nombre_box: '',
@@ -13,58 +17,145 @@ const form = useForm({
 
 const submit = () => {
     form.post(route('boxes.store'), {
-        onFinish: () => form.reset('nombre_box', 'descripcion'), // Resetea el formulario después de enviar
+        onSuccess: () => {
+            form.reset('nombre_box', 'descripcion');
+            router.get(route('boxes.index'), {}, {
+                preserveState: false,
+                preserveScroll: false,
+                replace: true,
+            });
+        },
+        onError: (errors) => {
+            console.error('Errores de validación:', errors);
+        }
     });
 };
-const props = defineProps({
-    user:Object 
-});
 </script>
 
 <template>
     <Head title="Crear Box" />
-    <AppLayout title="Listado de Vehículos" :user="user">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Crear Nuevo Box</h2>
-        </template>
 
+    <AppLayout :user="user">
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <form @submit.prevent="submit" class="max-w-lg mx-auto">
-                            <div>
-                                <InputLabel for="nombre_box" value="Nombre del Box" />
-                                <TextInput
-                                    id="nombre_box"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    v-model="form.nombre_box"
-                                    required
-                                    autofocus
-                                />
-                                <InputError class="mt-2" :message="form.errors.nombre_box" />
-                            </div>
+                <!-- Tarjeta principal con glassmorphism -->
+                <div class="bg-white/15 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+                    <!-- Partículas internas flotantes -->
+                    <div class="absolute top-4 right-4 w-2 h-2 bg-pink-300/40 rounded-full animate-pulse"></div>
+                    <div class="absolute top-8 left-8 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce" style="animation-delay: 0.5s"></div>
+                    <div class="absolute bottom-6 right-12 w-3 h-3 bg-purple-200/30 rounded-full animate-pulse" style="animation-delay: 1s"></div>
+                    <div class="absolute bottom-12 left-6 w-2 h-2 bg-fuchsia-300/35 rounded-full animate-bounce" style="animation-delay: 1.5s"></div>
 
-                            <div class="mt-4">
-                                <InputLabel for="descripcion" value="Descripción (Opcional)" />
-                                <textarea
-                                    id="descripcion"
-                                    class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full"
-                                    v-model="form.descripcion"
-                                ></textarea>
-                                <InputError class="mt-2" :message="form.errors.descripcion" />
+                    <!-- Título con decoración -->
+                    <div class="text-center mb-8 relative">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full animate-float backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                                <span class="text-lg">➕</span>
                             </div>
+                        </div>
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent mb-4 pt-6">
+                            Crear Nuevo Box
+                        </h2>
+                        <!-- Línea decorativa con gradiente -->
+                        <div class="flex justify-center items-center space-x-2 mb-4">
+                            <div class="w-8 h-0.5 bg-gradient-to-r from-transparent to-purple-400/50"></div>
+                            <div class="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+                            <div class="w-12 h-0.5 bg-gradient-to-r from-purple-400/50 to-pink-400/50"></div>
+                            <div class="w-3 h-3 bg-gradient-to-r from-pink-400 to-violet-400 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+                            <div class="w-8 h-0.5 bg-gradient-to-r from-pink-400/50 to-transparent"></div>
+                        </div>
+                    </div>
 
-                            <div class="flex items-center justify-end mt-4">
-                                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                                    Crear Box
-                                </PrimaryButton>
-                            </div>
-                        </form>
+                    <!-- Formulario -->
+                    <form @submit.prevent="submit" class="max-w-lg mx-auto">
+                        <div>
+                            <InputLabel for="nombre_box" value="Nombre del Box" class="text-purple-100" />
+                            <TextInput
+                                id="nombre_box"
+                                type="text"
+                                class="mt-1 block w-full bg-white/10 border-purple-300/30 text-purple-100 focus:border-purple-500 focus:ring-purple-500"
+                                v-model="form.nombre_box"
+                                required
+                                autofocus
+                            />
+                            <InputError class="mt-2 text-red-200" :message="form.errors.nombre_box" />
+                        </div>
+
+                        <div class="mt-4">
+                            <InputLabel for="descripcion" value="Descripción (Opcional)" class="text-purple-100" />
+                            <textarea
+                                id="descripcion"
+                                class="mt-1 block w-full bg-white/10 border-purple-300/30 text-purple-100 focus:border-purple-500 focus:ring-purple-500 rounded-md shadow-sm"
+                                v-model="form.descripcion"
+                            ></textarea>
+                            <InputError class="mt-2 text-red-200" :message="form.errors.descripcion" />
+                        </div>
+
+                        <div class="flex items-center justify-between mt-6">
+                            <!-- Botón Volver -->
+                            <Link
+                                :href="route('boxes.index')"
+                                class="group relative bg-purple-500/20 hover:bg-purple-500/30 text-purple-100 px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105 border border-purple-400/20 backdrop-blur-sm"
+                            >
+                                <span class="relative z-10 flex items-center gap-2">
+                                    ⬅ Volver al Índice
+                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </Link>
+
+                            <!-- Botón Crear -->
+                            <button
+                                type="submit"
+                                :disabled="form.processing"
+                                class="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm"
+                            >
+                                <span class="relative z-10 flex items-center gap-2">
+                                    {{ form.processing ? 'Creando...' : 'Crear Box' }}
+                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Decoración inferior con puntos animados -->
+                    <div class="flex justify-center items-center space-x-3 opacity-60 mt-8">
+                        <div class="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse"></div>
+                        <div class="w-1 h-1 bg-pink-400/50 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                        <div class="w-3 h-3 bg-violet-400/40 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                        <div class="w-1 h-1 bg-fuchsia-400/60 rounded-full animate-pulse" style="animation-delay: 0.6s"></div>
+                        <div class="w-2 h-2 bg-purple-300/50 rounded-full animate-pulse" style="animation-delay: 0.8s"></div>
                     </div>
                 </div>
             </div>
         </div>
-      </AppLayout>
+    </AppLayout>
 </template>
+
+<style scoped>
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+</style>
