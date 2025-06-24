@@ -1,15 +1,15 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { useForm, Head } from '@inertiajs/vue3';
+import { useForm, Head, Link } from '@inertiajs/vue3';
 import { ref, watch, onMounted, computed } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
     user: Object,
-    vehiculo: Object, // El vehículo que se está editando
+    vehiculo: Object,
     tiposVehiculo: Array,
     marcas: Array,
-    modelosMarcaActual: Array, // Modelos de la marca del vehículo que se está editando
+    modelosMarcaActual: Array,
 });
 
 const form = useForm({
@@ -17,21 +17,20 @@ const form = useForm({
     modelo_id: props.vehiculo.modelo_id,
     patente: props.vehiculo.patente,
     anio: props.vehiculo.anio,
-    tipo_vehiculo_id: props.vehiculo.tipo_vehiculo_id, // precargar con el tipo_vehiculo_id del vehículo
+    tipo_vehiculo_id: props.vehiculo.tipo_vehiculo_id,
 });
 
 const modelosDisponibles = ref([]);
 const marcaSeleccionada = ref('');
-const modeloSeleccionadoObjeto = ref(null); // Para guardar el objeto del modelo seleccionado con sus años
+const modeloSeleccionadoObjeto = ref(null);
 
-// Watcher para la marca seleccionada: carga los modelos
 watch(marcaSeleccionada, async (newMarcaId) => {
     modelosDisponibles.value = [];
     form.modelo_id = '';
-    form.tipo_vehiculo_id = ''; // Limpiar tipo si cambia la marca
-    modeloSeleccionadoObjeto.value = null; // Limpiar objeto modelo
-    form.anio = ''; // Limpiar año al cambiar la marca
-    form.patente = ''; // Limpiar patente al cambiar la marca
+    form.tipo_vehiculo_id = '';
+    modeloSeleccionadoObjeto.value = null;
+    form.anio = '';
+    form.patente = '';
 
     if (newMarcaId) {
         try {
@@ -47,15 +46,14 @@ watch(marcaSeleccionada, async (newMarcaId) => {
     }
 });
 
-// Watcher para el modelo seleccionado: asigna el tipo de vehículo y el objeto modelo completo
 watch(() => form.modelo_id, (newModeloId) => {
     if (newModeloId) {
         const selectedModel = modelosDisponibles.value.find(modelo => modelo.id === newModeloId);
         if (selectedModel) {
             form.tipo_vehiculo_id = selectedModel.tipo_vehiculo_id;
-            modeloSeleccionadoObjeto.value = selectedModel; // Guarda el objeto modelo completo
-            form.anio = ''; // Limpiar el año si el modelo cambia
-            form.patente = ''; // Limpiar la patente si el modelo cambia
+            modeloSeleccionadoObjeto.value = selectedModel;
+            form.anio = '';
+            form.patente = '';
         } else {
             form.tipo_vehiculo_id = '';
             modeloSeleccionadoObjeto.value = null;
@@ -70,29 +68,24 @@ watch(() => form.modelo_id, (newModeloId) => {
     }
 });
 
-// Watcher para el año: limpiar patente si cambia el año (para re-evaluar la longitud)
 watch(() => form.anio, (newAnio, oldAnio) => {
-    // Only clear if the previous anio was valid and the new one might change the length rule
     if (newAnio && oldAnio && (
         (newAnio < 2016 && oldAnio >= 2016) ||
         (newAnio >= 2016 && oldAnio < 2016)
     )) {
-        // Only clear if it's an auto/camioneta where the rule changes
         const selectedTipoVehiculo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
         if (selectedTipoVehiculo && (selectedTipoVehiculo.nombre === 'Auto' || selectedTipoVehiculo.nombre === 'Camioneta')) {
             form.patente = '';
         }
-    } else if (!newAnio) { // If year is cleared
+    } else if (!newAnio) {
         form.patente = '';
     }
-}, { immediate: false }); // Do not run immediately on component mount
+}, { immediate: false });
 
-// onMounted para precargar la marca, el modelo y el tipo al cargar el componente
 onMounted(() => {
-    if (props.vehiculo.modelo) { // Asegúrate de que el vehículo tenga su relación 'modelo' cargada
+    if (props.vehiculo.modelo) {
         marcaSeleccionada.value = props.vehiculo.modelo.marca_id;
         modelosDisponibles.value = props.modelosMarcaActual;
-        // Encuentra el objeto modelo completo del vehículo actual
         const initialSelectedModel = props.modelosMarcaActual.find(modelo => modelo.id === props.vehiculo.modelo_id);
         if (initialSelectedModel) {
             modeloSeleccionadoObjeto.value = initialSelectedModel;
@@ -100,12 +93,10 @@ onMounted(() => {
     }
 });
 
-// Propiedad computada para determinar el año mínimo permitido
 const minAnioPermitido = computed(() => {
     return modeloSeleccionadoObjeto.value ? modeloSeleccionadoObjeto.value.anio_inicio : null;
 });
 
-// Propiedad computada para determinar el año máximo permitido
 const maxAnioPermitido = computed(() => {
     const currentYear = new Date().getFullYear();
     if (modeloSeleccionadoObjeto.value) {
@@ -114,33 +105,29 @@ const maxAnioPermitido = computed(() => {
     return null;
 });
 
-// Propiedad computada para la longitud máxima de la patente
 const maxPatenteLength = computed(() => {
     const selectedTipoVehiculo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
 
     if (!selectedTipoVehiculo || !form.anio) {
-        return null; // No restriction until type and year are selected
+        return null;
     }
 
     const tipoNombre = selectedTipoVehiculo.nombre;
     const anio = form.anio;
 
     if (tipoNombre === 'Auto' || tipoNombre === 'Camioneta') {
-        // Logic for cars and trucks based on year
-        if (anio < 2016) { // Old or intermediate format
-            return 7; // e.g., AAA NNN or ABC 123 (including space)
-        } else { // Mercosur format
-            return 9; // e.g., AA NNN LL or AB 123 CD (including spaces)
+        if (anio < 2016) {
+            return 7;
+        } else {
+            return 9;
         }
     } else if (tipoNombre === 'Moto') {
-        // Fixed length for motorcycles (most common formats)
-        return 7; // e.g., 123 ABC or A 123 BC (including space)
+        return 7;
     }
 
-    return null; // Default, no restriction
+    return null;
 });
 
-// Opcional: Propiedad computada para mostrar el nombre del tipo de vehículo seleccionado automáticamente
 const tipoVehiculoAutoSeleccionadoNombre = computed(() => {
     if (form.tipo_vehiculo_id) {
         const tipo = props.tiposVehiculo.find(t => t.id === form.tipo_vehiculo_id);
@@ -152,7 +139,7 @@ const tipoVehiculoAutoSeleccionadoNombre = computed(() => {
 const submit = () => {
     form.post(route('vehiculos.update', props.vehiculo.id), {
         onSuccess: () => {
-            // No resetear en edición, usualmente
+            // No resetear en edición
         },
         onError: (errors) => {
             console.error('Error al actualizar el vehículo:', errors);
@@ -163,73 +150,100 @@ const submit = () => {
 
 <template>
     <AppLayout title="Editar Vehículo" :user="user">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Editar Vehículo
-            </h2>
-        </template>
-
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                    <form @submit.prevent="submit">
-                        <div v-if="$page.props.flash && $page.props.flash.success" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+            <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+                <!-- Tarjeta principal con glassmorphism -->
+                <div class="bg-white/15 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+                    <!-- Partículas internas flotantes -->
+                    <div class="absolute top-4 right-4 w-2 h-2 bg-pink-300/40 rounded-full animate-pulse"></div>
+                    <div class="absolute top-8 left-8 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce" style="animation-delay: 0.5s"></div>
+                    <div class="absolute bottom-6 right-12 w-3 h-3 bg-purple-200/30 rounded-full animate-pulse" style="animation-delay: 1s"></div>
+                    <div class="absolute bottom-12 left-6 w-2 h-2 bg-fuchsia-300/35 rounded-full animate-bounce" style="animation-delay: 1.5s"></div>
+
+                    <div class="text-center mb-8 relative">
+                        <!-- Elemento decorativo superior flotante -->
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full animate-float backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                                <span class="text-lg">🚗</span>
+                            </div>
+                        </div>
+
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent mb-4 pt-6">
+                            Editar Vehículo
+                        </h2>
+
+                        <!-- Línea decorativa con gradiente -->
+                        <div class="flex justify-center items-center space-x-2 mb-4">
+                            <div class="w-8 h-0.5 bg-gradient-to-r from-transparent to-purple-400/50"></div>
+                            <div class="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+                            <div class="w-12 h-0.5 bg-gradient-to-r from-purple-400/50 to-pink-400/50"></div>
+                            <div class="w-3 h-3 bg-gradient-to-r from-pink-400 to-violet-400 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+                            <div class="w-8 h-0.5 bg-gradient-to-r from-pink-400/50 to-transparent"></div>
+                        </div>
+                    </div>
+
+                    <form @submit.prevent="submit" class="space-y-6">
+                        <!-- Flash messages -->
+                        <div v-if="$page.props.flash && $page.props.flash.success" class="bg-green-500/20 border border-green-400/30 text-green-100 p-4 rounded-lg backdrop-blur-sm">
                             <p class="font-bold">Éxito</p>
                             <p>{{ $page.props.flash.success }}</p>
                         </div>
-                        <div v-if="$page.props.flash && $page.props.flash.error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                        <div v-if="$page.props.flash && $page.props.flash.error" class="bg-red-500/20 border border-red-400/30 text-red-100 p-4 rounded-lg backdrop-blur-sm">
                             <p class="font-bold">Error</p>
                             <p>{{ $page.props.flash.error }}</p>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="marca_seleccionada" class="block text-gray-700 text-sm font-bold mb-2">Marca:</label>
+                        <!-- Marca -->
+                        <div class="group relative">
+                            <label for="marca_seleccionada" class="block text-purple-100 text-sm font-bold mb-2">Marca:</label>
                             <select
                                 id="marca_seleccionada"
                                 v-model="marcaSeleccionada"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="w-full py-2 px-3 bg-white/10 border border-purple-300/30 text-purple-100 rounded-lg focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 backdrop-blur-sm transition-all duration-300"
                                 required
                             >
-                                <option value="" disabled>Selecciona una marca</option>
-                                <option v-for="marca in props.marcas" :key="marca.id" :value="marca.id">
+                                <option value="" disabled class="bg-purple-900">Selecciona una marca</option>
+                                <option v-for="marca in props.marcas" :key="marca.id" :value="marca.id" class="bg-purple-900">
                                     {{ marca.nombre }}
                                 </option>
                             </select>
-                            <div v-if="form.errors.marca_seleccionada" class="text-red-500 text-xs mt-1">{{ form.errors.marca_seleccionada }}</div>
+                            <div v-if="form.errors.marca_seleccionada" class="text-red-400 text-xs mt-1">{{ form.errors.marca_seleccionada }}</div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="modelo_id" class="block text-gray-700 text-sm font-bold mb-2">Modelo:</label>
+                        <!-- Modelo -->
+                        <div class="group relative">
+                            <label for="modelo_id" class="block text-purple-100 text-sm font-bold mb-2">Modelo:</label>
                             <select
                                 id="modelo_id"
                                 v-model="form.modelo_id"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="w-full py-2 px-3 bg-white/10 border border-purple-300/30 text-purple-100 rounded-lg focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 backdrop-blur-sm transition-all duration-300"
                                 :disabled="!marcaSeleccionada || modelosDisponibles.length === 0"
                                 required
                             >
-                                <option value="" disabled>Selecciona un modelo</option>
-                                <option v-if="!marcaSeleccionada" value="" disabled>Selecciona una marca primero</option>
-                                <option v-if="marcaSeleccionada && modelosDisponibles.length === 0" value="" disabled>No hay modelos para esta marca</option>
-                                <option v-for="modelo in modelosDisponibles" :key="modelo.id" :value="modelo.id">
+                                <option value="" disabled class="bg-purple-900">Selecciona un modelo</option>
+                                <option v-if="!marcaSeleccionada" value="" disabled class="bg-purple-900">Selecciona una marca primero</option>
+                                <option v-if="marcaSeleccionada && modelosDisponibles.length === 0" value="" disabled class="bg-purple-900">No hay modelos para esta marca</option>
+                                <option v-for="modelo in modelosDisponibles" :key="modelo.id" :value="modelo.id" class="bg-purple-900">
                                     {{ modelo.nombre }}
                                 </option>
                             </select>
-                            <div v-if="form.errors.modelo_id" class="text-red-500 text-xs mt-1">{{ form.errors.modelo_id }}</div>
+                            <div v-if="form.errors.modelo_id" class="text-red-400 text-xs mt-1">{{ form.errors.modelo_id }}</div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="anio" class="block text-gray-700 text-sm font-bold mb-2">Año:</label>
+                        <!-- Año -->
+                        <div class="group relative">
+                            <label for="anio" class="block text-purple-100 text-sm font-bold mb-2">Año:</label>
                             <input
                                 id="anio"
                                 type="number"
                                 v-model="form.anio"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="w-full py-2 px-3 bg-white/10 border border-purple-300/30 text-purple-100 rounded-lg focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 backdrop-blur-sm transition-all duration-300"
                                 :min="minAnioPermitido"
                                 :max="maxAnioPermitido"
                                 :disabled="!modeloSeleccionadoObjeto"
                                 required
                             />
-                            <div v-if="form.errors.anio" class="text-red-500 text-xs mt-1">
+                            <div v-if="form.errors.anio" class="text-red-400 text-xs mt-1">
                                 {{ form.errors.anio }}
                                 <span v-if="modeloSeleccionadoObjeto && form.anio && (form.anio < minAnioPermitido || form.anio > maxAnioPermitido)">
                                     (Debe estar entre {{ minAnioPermitido }} y {{ maxAnioPermitido }})
@@ -237,18 +251,19 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="patente" class="block text-gray-700 text-sm font-bold mb-2">Patente:</label>
+                        <!-- Patente -->
+                        <div class="group relative">
+                            <label for="patente" class="block text-purple-100 text-sm font-bold mb-2">Patente:</label>
                             <input
                                 id="patente"
                                 type="text"
                                 v-model="form.patente"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="w-full py-2 px-3 bg-white/10 border border-purple-300/30 text-purple-100 rounded-lg focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 backdrop-blur-sm transition-all duration-300"
                                 :maxlength="maxPatenteLength"
                                 :disabled="!form.anio || !form.tipo_vehiculo_id"
                                 required
                             />
-                            <div v-if="form.errors.patente" class="text-red-500 text-xs mt-1">
+                            <div v-if="form.errors.patente" class="text-red-400 text-xs mt-1">
                                 {{ form.errors.patente }}
                                 <span v-if="form.patente && maxPatenteLength && form.patente.length > maxPatenteLength">
                                     (Máximo {{ maxPatenteLength }} caracteres para este año y tipo de vehículo)
@@ -256,31 +271,82 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="tipo_vehiculo_id" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Vehículo:</label>
+                        <!-- Tipo de Vehículo -->
+                        <div class="group relative">
+                            <label for="tipo_vehiculo_id" class="block text-purple-100 text-sm font-bold mb-2">Tipo de Vehículo:</label>
                             <input type="hidden" name="tipo_vehiculo_id" v-model="form.tipo_vehiculo_id" />
                             <input
                                 type="text"
                                 :value="tipoVehiculoAutoSeleccionadoNombre"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed"
+                                class="w-full py-2 px-3 bg-white/5 border border-purple-300/20 text-purple-100 rounded-lg backdrop-blur-sm cursor-not-allowed"
                                 readonly
                                 :disabled="!form.tipo_vehiculo_id"
                             />
-                            <div v-if="form.errors.tipo_vehiculo_id" class="text-red-500 text-xs mt-1">{{ form.errors.tipo_vehiculo_id }}</div>
+                            <div v-if="form.errors.tipo_vehiculo_id" class="text-red-400 text-xs mt-1">{{ form.errors.tipo_vehiculo_id }}</div>
                         </div>
 
-                        <div class="flex items-center justify-end mt-4">
+                        <!-- Botones -->
+                        <div class="flex items-center justify-between mt-6">
+                            <Link
+                                :href="route('vehiculos.index')"
+                                class="group relative bg-purple-500/20 hover:bg-purple-500/30 text-purple-100 px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105 border border-purple-400/20 backdrop-blur-sm"
+                            >
+                                <span class="relative z-10 flex items-center gap-2">
+                                    ⬅ Volver
+                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </Link>
+
                             <button
                                 type="submit"
                                 :disabled="form.processing || !form.modelo_id || !form.tipo_vehiculo_id || !form.anio || !form.patente"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                class="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm"
                             >
-                                {{ form.processing ? 'Actualizando...' : 'Actualizar Vehículo' }}
+                                <span class="relative z-10">
+                                    {{ form.processing ? 'Actualizando...' : 'Actualizar Vehículo' }}
+                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                             </button>
                         </div>
                     </form>
+
+                    <!-- Decoración inferior con puntos animados -->
+                    <div class="flex justify-center items-center space-x-3 opacity-60 mt-8">
+                        <div class="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse"></div>
+                        <div class="w-1 h-1 bg-pink-400/50 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                        <div class="w-3 h-3 bg-violet-400/40 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                        <div class="w-1 h-1 bg-fuchsia-400/60 rounded-full animate-pulse" style="animation-delay: 0.6s"></div>
+                        <div class="w-2 h-2 bg-purple-300/50 rounded-full animate-pulse" style="animation-delay: 0.8s"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Efectos para los inputs */
+.group:hover select,
+.group:hover input:not([disabled]) {
+    transform: scale(1.01);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+</style>

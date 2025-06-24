@@ -35,7 +35,7 @@ onMounted(() => {
 
 const submit = () => {
     loginError.value = ''
-    registrationSuccess.value = '' // Limpiar mensaje de registro al intentar login
+    registrationSuccess.value = ''
     isSubmitting.value = true
 
     form.post(route('login'), {
@@ -44,30 +44,33 @@ const submit = () => {
             isSubmitting.value = false
         },
         onError: (errors) => {
-            console.log('Errores recibidos:', errors)
+            console.log('Errores completos recibidos:', errors)
+            console.log('form.errors:', form.errors)
 
-            // Manejar diferentes tipos de errores de login
+            // Resetear el estado de envío
+            isSubmitting.value = false
+
+            // Buscar el error más específico
             if (errors.email) {
-                loginError.value = `Email: ${errors.email}`
+                loginError.value = Array.isArray(errors.email) ? errors.email[0] : errors.email
             } else if (errors.password) {
-                loginError.value = `Contraseña: ${errors.password}`
+                loginError.value = Array.isArray(errors.password) ? errors.password[0] : errors.password
             } else if (errors.credentials) {
-                loginError.value = errors.credentials
+                loginError.value = Array.isArray(errors.credentials) ? errors.credentials[0] : errors.credentials
             } else if (errors.login) {
-                loginError.value = errors.login
+                loginError.value = Array.isArray(errors.login) ? errors.login[0] : errors.login
             } else if (errors.message) {
-                loginError.value = errors.message
+                loginError.value = Array.isArray(errors.message) ? errors.message[0] : errors.message
             } else {
-                // Si hay cualquier error, mostrar mensaje específico
+                // Si hay otros errores, tomar el primero disponible
                 const errorKeys = Object.keys(errors)
                 if (errorKeys.length > 0) {
                     const firstError = errors[errorKeys[0]]
-                    loginError.value = Array.isArray(firstError) ? firstError[0] : firstError || 'Credenciales incorrectas. Verifica tu email y contraseña.'
+                    loginError.value = Array.isArray(firstError) ? firstError[0] : firstError || 'Error inesperado.'
                 } else {
-                    loginError.value = 'Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.'
+                    loginError.value = 'Error al iniciar sesión. Verifique sus credenciales.'
                 }
             }
-            isSubmitting.value = false
         },
         onSuccess: () => {
             loginError.value = ''
@@ -113,10 +116,17 @@ const submit = () => {
                     <p class="text-sm font-medium text-red-100">{{ loginError }}</p>
                 </div>
 
-                <!-- Debug: Mostrar todos los errores del formulario -->
+                <!-- Debug: Mostrar todos los errores del formulario (solo en desarrollo) -->
                 <div v-if="Object.keys(form.errors).length > 0" class="mb-4 p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
-                    <p class="text-sm font-medium text-yellow-100">Errores del formulario:</p>
-                    <pre class="text-xs text-yellow-100 mt-1">{{ JSON.stringify(form.errors, null, 2) }}</pre>
+                    <p class="text-sm font-medium text-yellow-100">Debug - Errores del formulario:</p>
+                    <pre class="text-xs text-yellow-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(form.errors, null, 2) }}</pre>
+                </div>
+
+                <!-- Debug adicional: Estado del formulario -->
+                <div v-if="form.processing || isSubmitting" class="mb-4 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg">
+                    <p class="text-sm font-medium text-blue-100">
+                        Estado: form.processing = {{ form.processing }}, isSubmitting = {{ isSubmitting }}
+                    </p>
                 </div>
 
                 <form @submit.prevent="submit" class="space-y-6">
@@ -126,7 +136,7 @@ const submit = () => {
                         <div class="relative">
                             <TextInput id="email" type="email"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
-                                :class="{ 'border-red-400': form.errors.email }"
+                                :class="{ 'border-red-400': form.errors.email || loginError }"
                                 v-model="form.email" required autofocus autocomplete="username"
                                 placeholder="tu@email.com" />
                         </div>
@@ -139,7 +149,7 @@ const submit = () => {
                         <div class="relative">
                             <TextInput id="password" type="password"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
-                                :class="{ 'border-red-400': form.errors.password }"
+                                :class="{ 'border-red-400': form.errors.password || loginError }"
                                 v-model="form.password" required autocomplete="current-password"
                                 placeholder="••••••••" />
                         </div>
