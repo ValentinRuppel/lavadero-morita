@@ -315,17 +315,6 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                         </div>
                         <div class="mt-4 flex justify-center space-x-2" v-if="remainingTime > 0">
                             <button
-                                @click="submitFinishService"
-                                :class="{
-                                    'group relative bg-green-500/20 hover:bg-green-500/30 text-green-100 hover:text-green-200 px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105 border border-green-400/20 backdrop-blur-sm': !finishServiceForm.processing,
-                                    'opacity-25 cursor-not-allowed px-4 py-2': finishServiceForm.processing
-                                }"
-                                :disabled="finishServiceForm.processing"
-                            >
-                                <span class="relative z-10 flex items-center gap-2">✅ Finalizar Servicio</span>
-                                <div class="absolute inset-0 bg-gradient-to-r from-green-400/20 to-cyan-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            </button>
-                            <button
                                 @click="submitCancelService"
                                 :class="{
                                     'group relative bg-red-500/20 hover:bg-red-500/30 text-red-100 hover:text-red-200 px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105 border border-red-400/20 backdrop-blur-sm': !finishServiceForm.processing,
@@ -447,7 +436,7 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                                 </div>
                                 <div class="flex justify-end mt-4">
                                     <button
-                                        type="button"  @click="showStartServiceModal = true"
+                                        type="button"  @click="submitStartService"
                                         class="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm"
                                         :disabled="startServiceForm.processing"
                                     >
@@ -520,147 +509,7 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
             </div>
         </div>
 
-        <!-- Modal para iniciar un nuevo servicio -->
-        <div v-if="showStartServiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
-            <div class="bg-white/15 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto relative">
-                <div class="absolute top-2 right-2 w-2 h-2 bg-pink-300/40 rounded-full animate-pulse"></div>
-                <h3 class="text-xl font-semibold text-purple-100 mb-4">Iniciar Nuevo Servicio en Box {{ box.nombre_box }}</h3>
-                <form @submit.prevent="submitStartService" class="space-y-4">
-                    <div>
-                        <InputLabel for="modal_selected_client_id" value="Seleccionar Cliente" class="text-purple-100" />
-                        <select
-                            id="modal_selected_client_id"
-                            class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                            v-model="selectedClientId"
-                            @change="startServiceForm.user_id = selectedClientId"
-                            required
-                        >
-                            <option value="" class="bg-purple-800/50">Seleccione un cliente</option>
-                            <option v-for="cliente in props.clientes" :key="cliente.id" :value="cliente.id" class="bg-purple-800/50">
-                                {{ cliente.name }} ({{ cliente.email }})
-                            </option>
-                        </select>
-                        <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.user_id" />
-                    </div>
-                    <div v-if="selectedClientId" class="flex items-center space-x-4 mt-4">
-                        <label class="inline-flex items-center text-purple-100">
-                            <input type="radio" v-model="newClientVehicle" :value="false" class="form-radio text-purple-500 bg-white/10 border-purple-300/20 focus:ring-purple-500">
-                            <span class="ml-2">Vehículo Existente</span>
-                        </label>
-                        <label class="inline-flex items-center text-purple-100">
-                            <input type="radio" v-model="newClientVehicle" :value="true" class="form-radio text-purple-500 bg-white/10 border-purple-300/20 focus:ring-purple-500">
-                            <span class="ml-2">Registrar Nuevo Vehículo</span>
-                        </label>
-                    </div>
-                    <div v-if="selectedClientId && !newClientVehicle">
-                        <InputLabel for="modal_vehiculo_id" value="Seleccionar Vehículo" class="text-purple-100" />
-                        <select
-                            id="modal_vehiculo_id"
-                            class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                            v-model="startServiceForm.vehiculo_id"
-                            required
-                            :disabled="availableVehicles.length === 0"
-                        >
-                            <option value="" class="bg-purple-800/50">Seleccione un vehículo</option>
-                            <option v-if="availableVehicles.length === 0" disabled class="bg-purple-800/50">No hay vehículos para este cliente.</option>
-                            <option v-for="vehiculo in availableVehicles" :key="vehiculo.id" :value="vehiculo.id" class="bg-purple-800/50">
-                                {{ vehiculo.patente }} ({{ vehiculo.marca }} {{ vehiculo.modelo }} {{ vehiculo.anio }})
-                            </option>
-                        </select>
-                        <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.vehiculo_id" />
-                    </div>
-                    <div v-if="selectedClientId && newClientVehicle" class="space-y-4">
-                        <div>
-                            <InputLabel for="modal_vehiculo_patente_nuevo" value="Patente del Nuevo Vehículo" class="text-purple-100" />
-                            <TextInput
-                                id="modal_vehiculo_patente_nuevo"
-                                type="text"
-                                class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm uppercase"
-                                v-model="startServiceForm.vehiculo_patente_nuevo"
-                                required
-                            />
-                            <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.vehiculo_patente_nuevo" />
-                        </div>
-                        <div>
-                            <InputLabel for="modal_vehiculo_marca_nuevo" value="Marca del Vehículo" class="text-purple-100" />
-                            <TextInput
-                                id="modal_vehiculo_marca_nuevo"
-                                type="text"
-                                class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                                v-model="startServiceForm.vehiculo_marca_nuevo"
-                                required
-                            />
-                            <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.vehiculo_marca_nuevo" />
-                        </div>
-                        <div>
-                            <InputLabel for="modal_vehiculo_modelo_nuevo" value="Modelo del Vehículo" class="text-purple-100" />
-                            <TextInput
-                                id="modal_vehiculo_modelo_nuevo"
-                                type="text"
-                                class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                                v-model="startServiceForm.vehiculo_modelo_nuevo"
-                                required
-                            />
-                            <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.vehiculo_modelo_nuevo" />
-                        </div>
-                        <div>
-                            <InputLabel for="modal_vehiculo_anio_nuevo" value="Año del Vehículo" class="text-purple-100" />
-                            <TextInput
-                                id="modal_vehiculo_anio_nuevo"
-                                type="number"
-                                class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                                v-model="startServiceForm.vehiculo_anio_nuevo"
-                                min="1900"
-                                :max="new Date().getFullYear() + 1"
-                                required
-                            />
-                            <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.vehiculo_anio_nuevo" />
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <InputLabel for="modal_tipo_lavado_id" value="Tipo de Lavado" class="text-purple-100" />
-                        <select
-                            id="modal_tipo_lavado_id"
-                            class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                            v-model="startServiceForm.tipo_lavado_id"
-                            required
-                            :disabled="!selectedClientId || (!startServiceForm.vehiculo_id && !newClientVehicle)"
-                        >
-                            <option value="" class="bg-purple-800/50">Seleccione un tipo de lavado</option>
-                            <option v-for="tipo in filteredTiposLavado" :key="tipo.id" :value="tipo.id" class="bg-purple-800/50">
-                                {{ tipo.nombre_lavado }} (${{ tipo.precio }}) - {{ tipo.duracion_estimada }} min
-                            </option>
-                        </select>
-                        <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.tipo_lavado_id" />
-                    </div>
-                    <div v-if="startServiceForm.tipo_lavado_id" class="mt-4 p-3 bg-blue-500/10 border border-blue-400/20 rounded-md">
-                        <p class="font-semibold text-blue-100">Costo Estimado: ${{ estimatedPrice.toFixed(2) }}</p>
-                        <p class="font-semibold text-blue-100">Duración Estimada: {{ estimatedDuration }} minutos</p>
-                    </div>
-                    <div class="flex justify-end space-x-3 mt-4">
-                        <button
-                            type="button"
-                            @click="showStartServiceModal = false"
-                            class="group relative bg-red-500/20 hover:bg-red-500/30 text-red-100 hover:text-red-200 px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105 border border-red-400/20 backdrop-blur-sm"
-                        >
-                            <span class="relative z-10 flex items-center gap-2">❌ Cancelar</span>
-                            <div class="absolute inset-0 bg-gradient-to-r from-red-400/20 to-pink-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </button>
-                        <button
-                            type="submit"
-                            :class="{
-                                'group relative bg-green-500/20 hover:bg-green-500/30 text-green-100 hover:text-green-200 px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105 border border-green-400/20 backdrop-blur-sm': !startServiceForm.processing,
-                                'opacity-25 cursor-not-allowed px-4 py-2': startServiceForm.processing
-                            }"
-                            :disabled="startServiceForm.processing || (!selectedClientId) || (!startServiceForm.vehiculo_id && !newClientVehicle) || !startServiceForm.tipo_lavado_id"
-                        >
-                            <span class="relative z-10 flex items-center gap-2">✅ Iniciar Servicio</span>
-                            <div class="absolute inset-0 bg-gradient-to-r from-green-400/20 to-cyan-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+
     </AppLayout>
 </template>
 
