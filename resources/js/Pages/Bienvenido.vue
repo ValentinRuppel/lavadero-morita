@@ -225,46 +225,47 @@
                     <div class="grid md:grid-cols-3 gap-8">
                         <div
                             class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
-                            <h3 class="text-xl font-bold text-white mb-4 text-center">Motos</h3>
-                            <ul class="text-purple-100 space-y-2 mb-6">
-                                <li>• Hidrolabadora</li>
-                                <li>• Trapos, esponjas y productos de limpieza</li>
-                                <li>• Limpieza de llantas</li>
-                                <li>• 15-20 minutos</li>
-                            </ul>
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Lavado Rapido</h3>
                             <div class="text-center">
-                                <span class="text-2xl font-bold text-purple-200">$2,500</span>
+                                <span class="text-2xl font-bold text-purple-200">$5,000</span>
                             </div>
                         </div>
 
                         <div
                             class="bg-gradient-to-br from-purple-600/20 to-violet-700/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/30 hover:transform hover:scale-105 transition-all duration-300 ring-2 ring-purple-400/50">
-                            <h3 class="text-xl font-bold text-white mb-4 text-center">Autos</h3>
-                            <ul class="text-purple-100 space-y-2 mb-6">
-                                <li>• Hidrolabadora y enceradora</li>
-                                <li>• Productos para lavado interior</li>
-                                <li>• Aspiradora</li>
-                                <li>• Aromatizador gratis</li>
-                                <li>• 20-30 minutos</li>
-                            </ul>
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Espuma Activa</h3>
                             <div class="text-center">
-                                <span class="text-2xl font-bold text-purple-200">$4,500</span>
+                                <span class="text-2xl font-bold text-purple-200">$7,000</span>
                             </div>
                         </div>
 
                         <div
                             class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
-                            <h3 class="text-xl font-bold text-white mb-4 text-center">Camionetas</h3>
-                            <h4 class="text-xl font-bold text-white mb-4 text-center">!Todo el espacio necesario!</h4>
-                            <ul class="text-purple-100 space-y-2 mb-6">
-                                <li>• Hidrolabadora y enceradora</li>
-                                <li>• Productos para lavado interior</li>
-                                <li>• Aspiradora</li>
-                                <li>• Aromatizador gratis</li>
-                                <li>• 30-40 minutos</li>
-                            </ul>
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Solo cera</h3>
                             <div class="text-center">
-                                <span class="text-2xl font-bold text-purple-200">$8,000</span>
+                                <span class="text-2xl font-bold text-purple-200">$6,000</span>
+                            </div>
+                        </div>
+                        
+                        <div
+                            class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Limpieza de LLantas</h3>
+                            <div class="text-center">
+                                <span class="text-2xl font-bold text-purple-200">$5,000</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-gradient-to-br from-purple-600/20 to-violet-700/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/30 hover:transform hover:scale-105 transition-all duration-300 ring-2 ring-purple-400/50">
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Lavado Chasis</h3>
+                            <div class="text-center">
+                                <span class="text-2xl font-bold text-purple-200">$10,000</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
+                            <h3 class="text-xl font-bold text-white mb-4 text-center">Combo Rapido Total</h3>
+                            <div class="text-center">
+                                <span class="text-2xl font-bold text-purple-200">$15,000</span>
                             </div>
                         </div>
                     </div>

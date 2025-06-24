@@ -61,6 +61,14 @@ class TiposLavadoSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'nombre_lavado' => 'Lavado Chasis',
+                'descripcion' => 'Incluye todas las etapas: espuma, aclarado, llantas y cera.',
+                'precio' => 10000.00,
+                'duracion_estimada' => 15,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

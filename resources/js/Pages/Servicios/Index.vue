@@ -19,7 +19,7 @@ const props = defineProps({
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 md:max-w-5xl">
                 <!-- Contenedor principal con glassmorphism y efectos -->
                 <div class="bg-white/15 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
 
@@ -55,97 +55,65 @@ const props = defineProps({
                                 <table class="min-w-full divide-y divide-purple-300/20">
                                     <thead class="bg-gradient-to-r from-purple-600/20 to-violet-600/20 backdrop-blur-sm">
                                         <tr>
-                                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Fecha Inicio
-                                                </div>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[100px]">
+                                                Fecha Inicio
                                             </th>
-                                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Fecha Fin
-                                                </div>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[100px]">
+                                                Fecha Fin
                                             </th>
-                                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Vehículo
-                                                </div>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[150px]">
+                                                Vehículo
                                             </th>
-                                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Tipo Lavado
-                                                </div>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[120px]">
+                                                Tipo Lavado
                                             </th>
-                                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Precio Total
-                                                </div>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[100px]">
+                                                Precio Total
                                             </th>
-                                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Estado
-                                                </div>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[100px]">
+                                                Estado
                                             </th>
-
-                                            <th v-if="props.isAdmin" scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Cliente
-                                                </div>
-                                            </th>
-                                            <th v-if="props.isAdmin" scope="col" class="px-6 py-4 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0">
-                                                <div class="flex items-center gap-2">
-                                                    Admin Asignado
-                                                </div>
+                                            <th v-if="props.isAdmin" scope="col" class="px-4 py-2 text-left text-xs font-bold text-purple-100 uppercase tracking-wider border-r border-purple-300/20 last:border-r-0 min-w-[120px]">
+                                                Cliente
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-purple-300/10">
-                                        <tr v-for="(servicio, index) in props.servicios.data" :key="servicio.id"
-                                            class="group hover:bg-white/5 transition-all duration-300 relative"
-                                            :class="index % 2 === 0 ? 'bg-white/5' : 'bg-purple-500/5'">
-
-                                            <!-- Efecto de brillo en hover -->
-                                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-100 font-medium border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-purple-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-purple-400/20">
+                                        <tr v-for="(servicio, index) in props.servicios.data" :key="servicio.id" class="group hover:bg-white/5 transition-all duration-300 min-h-12" :class="index % 2 === 0 ? 'bg-white/5' : 'bg-purple-500/5'">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-purple-100 font-medium text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-purple-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-purple-400/20">
                                                     {{ servicio.fecha_inicio }}
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-100 font-medium border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-pink-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-pink-400/20">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-purple-100 font-medium text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-pink-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-pink-400/20">
                                                     {{ servicio.fecha_fin }}
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-100 font-medium border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-violet-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-violet-400/20">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-purple-100 font-medium text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-violet-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-violet-400/20">
                                                     <div class="font-bold text-violet-200">{{ servicio.vehiculo.patente }}</div>
                                                     <div class="text-xs text-violet-300">{{ servicio.vehiculo.marca }} {{ servicio.vehiculo.modelo }}</div>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-100 font-medium border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-fuchsia-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-fuchsia-400/20">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-purple-100 font-medium text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-fuchsia-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-fuchsia-400/20">
                                                     {{ servicio.tipo_lavado.nombre }}
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-green-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-green-400/20">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-green-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-green-400/20">
                                                     <span class="font-bold text-green-200 text-lg">${{ servicio.precio_total }}</span>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-yellow-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-yellow-400/20">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-yellow-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-yellow-400/20">
                                                     <span class="font-semibold text-yellow-200">{{ servicio.estado }}</span>
                                                 </div>
                                             </td>
-
-                                            <td v-if="props.isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-purple-100 font-medium border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-blue-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-blue-400/20">
+                                            <td v-if="props.isAdmin" class="px-4 py-2 whitespace-nowrap text-sm text-purple-100 font-medium text-center border-r border-purple-300/10 last:border-r-0 relative">
+                                                <div class="bg-blue-500/20 backdrop-blur-sm rounded-lg px-2 py-1 border border-blue-400/20">
                                                     {{ servicio.cliente?.name ?? 'Cliente Eliminado' }}
-                                                </div>
-                                            </td>
-                                            <td v-if="props.isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-purple-100 font-medium border-r border-purple-300/10 last:border-r-0 relative">
-                                                <div class="bg-orange-500/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-orange-400/20">
-                                                    {{ servicio.administrador_nombre ?? 'Admin Eliminado' }}
                                                 </div>
                                             </td>
                                         </tr>
@@ -158,17 +126,13 @@ const props = defineProps({
                         <div class="mt-8 flex justify-between items-center">
                             <Link v-if="props.servicios.prev_page_url" :href="props.servicios.prev_page_url"
                                   class="group relative bg-gradient-to-r from-indigo-500/80 to-purple-600/80 hover:from-indigo-600/90 hover:to-purple-700/90 text-white rounded-xl shadow-xl px-6 py-3 transform hover:scale-105 transition-all duration-300 ease-in-out backdrop-blur-md border border-white/20 overflow-hidden">
-
-                                <!-- Efecto de brillo en movimiento -->
                                 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
                                 <div class="relative z-10 flex items-center gap-2">
                                     <span>⬅️</span>
                                     <span class="font-medium">Anterior</span>
                                 </div>
                             </Link>
 
-                            <!-- Indicador de página con glassmorphism -->
                             <div class="bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 border border-purple-300/20">
                                 <span class="text-sm font-semibold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
                                     📄 Página {{ props.servicios.current_page }} de {{ props.servicios.last_page }}
@@ -177,29 +141,22 @@ const props = defineProps({
 
                             <Link v-if="props.servicios.next_page_url" :href="props.servicios.next_page_url"
                                   class="group relative bg-gradient-to-r from-purple-600/80 to-pink-600/80 hover:from-purple-700/90 hover:to-pink-700/90 text-white rounded-xl shadow-xl px-6 py-3 transform hover:scale-105 transition-all duration-300 ease-in-out backdrop-blur-md border border-white/20 overflow-hidden">
-
-                                <!-- Efecto de brillo en movimiento -->
                                 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
                                 <div class="relative z-10 flex items-center gap-2">
                                     <span class="font-medium">Siguiente</span>
                                     <span>➡️</span>
                                 </div>
                             </Link>
                         </div>
-
                     </div>
 
                     <!-- Estado vacío con glassmorphism -->
                     <div v-else class="text-center py-16 relative">
-                        <!-- Elemento decorativo central -->
                         <div class="flex justify-center mb-6">
                             <div class="w-20 h-20 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full animate-float backdrop-blur-sm border border-white/20 flex items-center justify-center">
                                 <span class="text-3xl">📋</span>
                             </div>
                         </div>
-
-                        <!-- Mensaje con glassmorphism -->
                         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20 max-w-md mx-auto">
                             <h3 class="text-xl font-bold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent mb-4">
                                 Sin Servicios
@@ -209,8 +166,6 @@ const props = defineProps({
                                 <span v-else>Aún no tienes servicios de lavado finalizados.</span>
                             </p>
                         </div>
-
-                        <!-- Decoración inferior -->
                         <div class="flex justify-center items-center space-x-3 mt-6 opacity-60">
                             <div class="w-2 h-2 bg-purple-400/60 rounded-full animate-pulse"></div>
                             <div class="w-1 h-1 bg-pink-400/50 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
@@ -218,8 +173,8 @@ const props = defineProps({
                             <div class="w-1 h-1 bg-fuchsia-400/60 rounded-full animate-pulse" style="animation-delay: 0.6s"></div>
                             <div class="w-2 h-2 bg-purple-300/50 rounded-full animate-pulse" style="animation-delay: 0.8s"></div>
                         </div>
-
                     </div>
+
                     <!-- Botón de volver -->
                     <div class="flex justify-start mt-6">
                         <Link
@@ -240,16 +195,12 @@ const props = defineProps({
 
 <style scoped>
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+    animation: float 3s ease-in-out infinite;
 }
 
 /* Animaciones suaves para las celdas */
@@ -303,11 +254,20 @@ const props = defineProps({
 
 /* Scroll suave */
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 /* Efectos adicionales para los botones de paginación */
 .group:hover {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Ajustes para la tabla */
+th, td {
+    min-width: 100px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
