@@ -343,7 +343,6 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                         <div v-else-if="props.box.estado === 'activo'" class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
                             <h4 class="text-lg font-semibold text-green-800 mb-4">Iniciar Nuevo Servicio:</h4>
                             <form @submit.prevent="submitStartService" class="space-y-4">
-
                                 <div>
                                     <InputLabel for="selected_client_id" value="Seleccionar Cliente" />
                                     <select
@@ -426,39 +425,38 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                                         <InputError class="mt-2" :message="startServiceForm.errors.vehiculo_anio_nuevo" />
                                     </div>
                                 </div>
-                            </div>
-                            <div class="mt-4">
-                                <InputLabel for="tipo_lavado_id" value="Tipo de Lavado" class="text-purple-100" />
-                                <select
-                                    id="tipo_lavado_id"
-                                    class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
-                                    v-model="startServiceForm.tipo_lavado_id"
-                                    required
-                                    :disabled="!selectedClientId || (!startServiceForm.vehiculo_id && !newClientVehicle)"
-                                >
-                                    <option value="" class="bg-purple-800/50">Seleccione un tipo de lavado</option>
-                                    <option v-for="tipo in filteredTiposLavado" :key="tipo.id" :value="tipo.id" class="bg-purple-800/50">
-                                        {{ tipo.nombre_lavado }} (${{ tipo.precio }}) - {{ tipo.duracion_estimada }} min
-                                    </option>
-                                </select>
-                                <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.tipo_lavado_id" />
-                            </div>
-                            <div v-if="startServiceForm.tipo_lavado_id" class="mt-4 p-3 bg-blue-500/10 border border-blue-400/20 rounded-md">
-                                <p class="font-semibold text-blue-100">Costo Estimado: ${{ estimatedPrice.toFixed(2) }}</p>
-                                <p class="font-semibold text-blue-100">Duración Estimada: {{ estimatedDuration }} minutos</p>
-                            </div>
-                            <div class="flex justify-end mt-4">
-                                <button
-                                    @click="showStartServiceModal = true"
-                                    class="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm"
-                                    :disabled="startServiceForm.processing"
-                                >
-                                    <span class="relative z-10 flex items-center gap-2">➕ Iniciar Servicio</span>
-                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                                <div class="mt-4">
+                                    <InputLabel for="tipo_lavado_id" value="Tipo de Lavado" class="text-purple-100" />
+                                    <select
+                                        id="tipo_lavado_id"
+                                        class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
+                                        v-model="startServiceForm.tipo_lavado_id"
+                                        required
+                                        :disabled="!selectedClientId || (!startServiceForm.vehiculo_id && !newClientVehicle)"
+                                    >
+                                        <option value="" class="bg-purple-800/50">Seleccione un tipo de lavado</option>
+                                        <option v-for="tipo in filteredTiposLavado" :key="tipo.id" :value="tipo.id" class="bg-purple-800/50">
+                                            {{ tipo.nombre_lavado }} (${{ tipo.precio }}) - {{ tipo.duracion_estimada }} min
+                                        </option>
+                                    </select>
+                                    <InputError class="mt-2 text-red-100" :message="startServiceForm.errors.tipo_lavado_id" />
+                                </div>
+                                <div v-if="startServiceForm.tipo_lavado_id" class="mt-4 p-3 bg-blue-500/10 border border-blue-400/20 rounded-md">
+                                    <p class="font-semibold text-blue-100">Costo Estimado: ${{ estimatedPrice.toFixed(2) }}</p>
+                                    <p class="font-semibold text-blue-100">Duración Estimada: {{ estimatedDuration }} minutos</p>
+                                </div>
+                                <div class="flex justify-end mt-4">
+                                    <button
+                                        type="button"  @click="showStartServiceModal = true"
+                                        class="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm"
+                                        :disabled="startServiceForm.processing"
+                                    >
+                                        <span class="relative z-10 flex items-center gap-2">➕ Iniciar Servicio</span>
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
 
                     <!-- Box en mantenimiento -->
                     <div v-else-if="props.box.estado === 'mantenimiento'" class="mt-6 p-4 bg-yellow-500/10 rounded-lg border border-yellow-400/20 text-yellow-100">
