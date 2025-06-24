@@ -6,7 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
 
 defineProps({
     canResetPassword: Boolean,
@@ -19,46 +19,59 @@ const form = useForm({
     remember: false,
 })
 
-const loginError = ref('');
-const isSubmitting = ref(false);
+const loginError = ref('')
+const registrationSuccess = ref('')
+const isSubmitting = ref(false)
+
+// Verificar si viene desde registro exitoso
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('registered')) {
+        registrationSuccess.value = '¡Cuenta creada exitosamente! Ya puedes iniciar sesión con tus credenciales.'
+        // Limpiar la URL después de mostrar el mensaje
+        window.history.replaceState({}, document.title, window.location.pathname)
+    }
+})
 
 const submit = () => {
-    loginError.value = ''; // Limpiar errores previos
-    isSubmitting.value = true;
+    loginError.value = ''
+    registrationSuccess.value = '' // Limpiar mensaje de registro al intentar login
+    isSubmitting.value = true
 
     form.post(route('login'), {
         onFinish: () => {
-            form.reset('password');
-            isSubmitting.value = false;
+            form.reset('password')
+            isSubmitting.value = false
         },
         onError: (errors) => {
-            console.log('Errores recibidos:', errors); // Para debugging
+            console.log('Errores recibidos:', errors)
 
             // Manejar diferentes tipos de errores de login
             if (errors.email) {
-                loginError.value = errors.email;
+                loginError.value = `Email: ${errors.email}`
             } else if (errors.password) {
-                loginError.value = errors.password;
+                loginError.value = `Contraseña: ${errors.password}`
             } else if (errors.credentials) {
-                loginError.value = errors.credentials;
+                loginError.value = errors.credentials
             } else if (errors.login) {
-                loginError.value = errors.login;
+                loginError.value = errors.login
             } else if (errors.message) {
-                loginError.value = errors.message;
+                loginError.value = errors.message
             } else {
-                // Si hay cualquier error, mostrar mensaje genérico
-                const errorKeys = Object.keys(errors);
+                // Si hay cualquier error, mostrar mensaje específico
+                const errorKeys = Object.keys(errors)
                 if (errorKeys.length > 0) {
-                    loginError.value = errors[errorKeys[0]] || 'Credenciales incorrectas. Verifica tu email y contraseña.';
+                    const firstError = errors[errorKeys[0]]
+                    loginError.value = Array.isArray(firstError) ? firstError[0] : firstError || 'Credenciales incorrectas. Verifica tu email y contraseña.'
                 } else {
-                    loginError.value = 'Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.';
+                    loginError.value = 'Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.'
                 }
             }
-            isSubmitting.value = false;
+            isSubmitting.value = false
         },
         onSuccess: () => {
-            loginError.value = '';
-            isSubmitting.value = false;
+            loginError.value = ''
+            isSubmitting.value = false
         }
     })
 }
@@ -83,7 +96,12 @@ const submit = () => {
 
             <!-- Formulario -->
             <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 shadow-2xl">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Inicio de Sesión</h2>
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h2>
+
+                <!-- Mensaje de registro exitoso -->
+                <div v-if="registrationSuccess" class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg animate-pulse">
+                    <p class="text-sm font-medium text-green-100">{{ registrationSuccess }}</p>
+                </div>
 
                 <!-- Mensajes de estado -->
                 <div v-if="status" class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg">

@@ -134,7 +134,7 @@ const submit = () => {
                             Enviando enlace...
                         </span>
                         <span v-else class="flex items-center justify-center gap-2">
-                            📧 Enviar enlace de recuperación
+                            Enviar enlace de recuperación
                         </span>
                     </PrimaryButton>
 
