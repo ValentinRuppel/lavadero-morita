@@ -299,7 +299,6 @@ const submit = () => {
                                 <span class="relative z-10">
                                     {{ form.processing ? 'Actualizando...' : 'Actualizar Vehículo' }}
                                 </span>
-                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                             </button>
                         </div>
                     </form>
