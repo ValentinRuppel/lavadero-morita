@@ -34,8 +34,6 @@ const props = defineProps({
     user: Object,
 });
 
-// *** 'page' ya no es necesario si solo lo usabas para .visit() ***
-// const page = usePage();
 
 const startServiceForm = useForm({
     box_id: props.box.id,
@@ -186,7 +184,7 @@ const estimatedPrice = computed(() => {
     if (!newClientVehicle.value && startServiceForm.vehiculo_id) {
         const selectedVehicle = availableVehicles.value.find(v => v.id === startServiceForm.vehiculo_id);
         if (selectedVehicle && selectedVehicle.tipo_vehiculo_precio !== undefined) {
-             tipoVehiculoPrice = parseFloat(selectedVehicle.tipo_vehiculo_precio);
+            tipoVehiculoPrice = parseFloat(selectedVehicle.tipo_vehiculo_precio);
         } else if (selectedVehicle && selectedVehicle.tipo_vehiculo && selectedVehicle.tipo_vehiculo.precio !== undefined) {
             tipoVehiculoPrice = parseFloat(selectedVehicle.tipo_vehiculo.precio);
         }

@@ -122,12 +122,6 @@ const submit = () => {
                     <pre class="text-xs text-yellow-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(form.errors, null, 2) }}</pre>
                 </div>
 
-                <!-- Debug adicional: Estado del formulario -->
-                <div v-if="form.processing || isSubmitting" class="mb-4 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg">
-                    <p class="text-sm font-medium text-blue-100">
-                        Estado: form.processing = {{ form.processing }}, isSubmitting = {{ isSubmitting }}
-                    </p>
-                </div>
 
                 <form @submit.prevent="submit" class="space-y-6">
                     <!-- Email -->
