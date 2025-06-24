@@ -19,30 +19,10 @@ class AdministratorSeeder extends Seeder
         Administrator::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name' => 'Super Admin',
-                'password' => Hash::make('password'),
+                'name' => 'Admin',
+                'password' => Hash::make('12345678'),
                 'email_verified_at' => now(),
                 'user_id' => null, // No asociado a un cliente
-            ]
-        );
-
-        // Crea un administrador que TAMBIÉN es un cliente
-        $clientAdminUser = User::firstOrCreate(
-            ['email' => 'client_admin@example.com'],
-            [
-                'name' => 'Client Admin User',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        Administrator::firstOrCreate(
-            ['email' => 'admin_with_client@example.com'],
-            [
-                'name' => 'Admin with Client Profile',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-                'user_id' => $clientAdminUser->id, // Asociado al cliente creado
             ]
         );
     }

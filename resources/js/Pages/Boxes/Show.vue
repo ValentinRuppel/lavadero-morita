@@ -7,9 +7,25 @@ import TextInput from '@/Components/TextInput.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 
 // *** Importa 'router' en lugar de 'usePage' para la navegación ***
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch, onUnmounted } from 'vue';
 
+const page = usePage()
+const showError = ref(false)
+const errorMessage = ref('')
+// Observa cuando llega el mensaje flash
+watch(() => page.props.flash.error, (value) => {
+  if (value) {
+    errorMessage.value = value
+    showError.value = true
+
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+      showError.value = false
+      errorMessage.value = ''
+    }, 5000)
+  }
+}, { immediate: true })
 const props = defineProps({
     box: Object,
     tiposLavado: Array,
@@ -280,6 +296,9 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
         </template>
 
         <div class="py-12">
+        <div v-if="page.props.flash.error" class="bg-red-500 text-white p-3 rounded">
+            {{ page.props.flash.error }}
+        </div>
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -314,9 +333,6 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
 
                             <!-- Botones de Finalizar/Cancelar SOLO si el tiempo no ha terminado -->
                             <div class="mt-4 flex space-x-2" v-if="remainingTime > 0">
-                                <PrimaryButton @click="submitFinishService" :disabled="finishServiceForm.processing">
-                                    Finalizar Servicio
-                                </PrimaryButton>
                                 <DangerButton @click="submitCancelService" :disabled="finishServiceForm.processing">
                                     Cancelar Servicio
                                 </DangerButton>
@@ -360,7 +376,6 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                                             {{ vehiculo.patente }} {{ vehiculo.modelo.marca.nombre }} {{ vehiculo.modelo.nombre }} {{ vehiculo.anio }}
                                         </option>
                                     </select>
-                                    <InputError class="mt-2" :message="startServiceForm.errors.vehiculo_id" />
                                 </div>
 
                                 <div v-if="selectedClientId && newClientVehicle">

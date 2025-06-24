@@ -61,6 +61,26 @@ class MarcaModeloSeeder extends Seeder
                 ['nombre' => 'CB125F', 'tipo_vehiculo_id' => $motoTypeId, 'anio_inicio' => 2015, 'anio_fin' => null], // Production ongoing
                 ['nombre' => 'Wave', 'tipo_vehiculo_id' => $motoTypeId, 'anio_inicio' => 1995, 'anio_fin' => null], // Production ongoing
             ],
+            'Peugeot' => [
+                ['nombre' => '208', 'tipo_vehiculo_id' => $autoTypeId, 'anio_inicio' => 2012, 'anio_fin' => null],
+                ['nombre' => '308', 'tipo_vehiculo_id' => $autoTypeId, 'anio_inicio' => 2007, 'anio_fin' => null],
+                ['nombre' => 'Partner', 'tipo_vehiculo_id' => $camionetaTypeId, 'anio_inicio' => 1996, 'anio_fin' => null],
+            ],
+            'Citroën' => [
+                ['nombre' => 'C3', 'tipo_vehiculo_id' => $autoTypeId, 'anio_inicio' => 2002, 'anio_fin' => null],
+                ['nombre' => 'Berlingo', 'tipo_vehiculo_id' => $camionetaTypeId, 'anio_inicio' => 1996, 'anio_fin' => null],
+                ['nombre' => 'C4 Cactus', 'tipo_vehiculo_id' => $autoTypeId, 'anio_inicio' => 2014, 'anio_fin' => null],
+            ],
+            'Nissan' => [
+                ['nombre' => 'Versa', 'tipo_vehiculo_id' => $autoTypeId, 'anio_inicio' => 2011, 'anio_fin' => null],
+                ['nombre' => 'Frontier', 'tipo_vehiculo_id' => $camionetaTypeId, 'anio_inicio' => 1997, 'anio_fin' => null],
+                ['nombre' => 'Sentra', 'tipo_vehiculo_id' => $autoTypeId, 'anio_inicio' => 1982, 'anio_fin' => null],
+            ],
+            'Yamaha' => [
+                ['nombre' => 'FZ-S', 'tipo_vehiculo_id' => $motoTypeId, 'anio_inicio' => 2008, 'anio_fin' => null],
+                ['nombre' => 'YBR 125', 'tipo_vehiculo_id' => $motoTypeId, 'anio_inicio' => 2000, 'anio_fin' => null],
+                ['nombre' => 'XTZ 125', 'tipo_vehiculo_id' => $motoTypeId, 'anio_inicio' => 2003, 'anio_fin' => null],
+            ],
         ];
 
         foreach ($marcas as $marcaNombre => $modelosData) {

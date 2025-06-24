@@ -95,57 +95,43 @@ class ServicioLavadoController extends Controller
     {
         Log::info('Intentando iniciar servicio - Datos recibidos:', $request->all());
 
-        // 1. Definir las reglas de validación
         $rules = [
             'box_id' => ['required', 'exists:boxes,id'],
             'tipo_lavado_id' => ['required', 'exists:tipo_lavados,id'],
             'administrador_id' => ['required', 'exists:administrators,id'],
 
-            // Reglas para cliente y vehículo existente/nuevo
-            'user_id' => ['nullable', 'exists:users,id'], // Ahora user_id puede ser nulo si el vehículo es nuevo y no se seleccionó cliente
-            'vehiculo_id' => ['nullable', 'exists:vehiculos,id'], // ID del vehículo existente
+            'user_id' => ['nullable', 'exists:users,id'],
+            'vehiculo_id' => ['nullable', 'exists:vehiculos,id'],
 
-            // Reglas para un VEHÍCULO NUEVO (si vehiculo_id es nulo)
             'vehiculo_patente_nuevo' => [
-                Rule::requiredIf(function () use ($request) {
-                    return empty($request->vehiculo_id); // Requerido si no se seleccionó un vehículo existente
-                }),
+                Rule::requiredIf(function () use ($request) { return empty($request->vehiculo_id); }),
                 'nullable', 'string', 'max:20', 'unique:vehiculos,patente',
             ],
             'vehiculo_marca_nuevo' => [
-                Rule::requiredIf(function () use ($request) {
-                    return empty($request->vehiculo_id);
-                }),
+                Rule::requiredIf(function () use ($request) { return empty($request->vehiculo_id); }),
                 'nullable', 'string', 'max:255',
             ],
             'vehiculo_modelo_nuevo' => [
-                Rule::requiredIf(function () use ($request) {
-                    return empty($request->vehiculo_id);
-                }),
+                Rule::requiredIf(function () use ($request) { return empty($request->vehiculo_id); }),
                 'nullable', 'string', 'max:255',
             ],
             'vehiculo_anio_nuevo' => [
-                Rule::requiredIf(function () use ($request) {
-                    return empty($request->vehiculo_id);
-                }),
+                Rule::requiredIf(function () use ($request) { return empty($request->vehiculo_id); }),
                 'nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1),
             ],
-            'vehiculo_tipo_vehiculo_id_nuevo' => [ // <-- ¡Nueva regla para el tipo de vehículo del coche nuevo!
-                Rule::requiredIf(function () use ($request) {
-                    return empty($request->vehiculo_id);
-                }),
+            'vehiculo_tipo_vehiculo_id_nuevo' => [
+                Rule::requiredIf(function () use ($request) { return empty($request->vehiculo_id); }),
                 'nullable', 'exists:tipos_vehiculos,id',
             ],
         ];
 
-        // 2. Validar los datos
         $validatedData = $request->validate($rules);
 
         DB::beginTransaction();
         try {
             $box = Box::find($validatedData['box_id']);
 
-            // Verificar si el box ya está ocupado
+            // Verificar si el box al que se quiere asignar ya está ocupado
             if ($box->estado === 'ocupado') {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'El box ya está ocupado.');
@@ -155,7 +141,7 @@ class ServicioLavadoController extends Controller
             $tipoVehiculoPrecio = 0;
             $tipoLavadoPrecio = 0;
 
-            // 3. Obtener o crear el vehículo y su precio de tipo
+            // Obtener o crear el vehículo
             if (!empty($validatedData['vehiculo_id'])) {
                 // Vehículo existente
                 $vehiculo = Vehiculo::with('tipoVehiculo')->find($validatedData['vehiculo_id']);
@@ -164,37 +150,48 @@ class ServicioLavadoController extends Controller
                 }
                 $tipoVehiculoPrecio = $vehiculo->tipoVehiculo->precio ?? 0;
             } else {
-                // Nuevo vehículo: Primero validar que se proporcionó user_id si no se seleccionó un existente
-                // Este `user_id` vendría de la selección del cliente para el nuevo vehículo
-                $userIdForNewVehicle = $request->input('user_id'); // Usamos input porque la validación de user_id es nullable
+                // Nuevo vehículo
+                $userIdForNewVehicle = $request->input('user_id');
                 if (empty($userIdForNewVehicle)) {
                     throw new \Exception("No se proporcionó un cliente para el nuevo vehículo.");
                 }
 
                 $vehiculo = Vehiculo::create([
-                    'user_id' => $userIdForNewVehicle, // Usar el user_id del request
-                    'tipo_vehiculo_id' => $validatedData['vehiculo_tipo_vehiculo_id_nuevo'], // ID del tipo de vehículo para el nuevo coche
+                    'user_id' => $userIdForNewVehicle,
+                    'tipo_vehiculo_id' => $validatedData['vehiculo_tipo_vehiculo_id_nuevo'],
                     'patente' => $validatedData['vehiculo_patente_nuevo'],
-                    'marca' => $validatedData['vehiculo_marca_nuevo'],
+                    'marca' => $validatedData['vehiculo_marca_nuevo'], // Asumiendo que 'marca' y 'modelo' son columnas directas en Vehiculo o las obtienes de Modelo
                     'modelo' => $validatedData['vehiculo_modelo_nuevo'],
                     'anio' => $validatedData['vehiculo_anio_nuevo'],
                 ]);
-                // Obtener el precio del tipo de vehículo recién creado
                 $tipoVehiculo = TipoVehiculo::find($validatedData['vehiculo_tipo_vehiculo_id_nuevo']);
                 $tipoVehiculoPrecio = $tipoVehiculo->precio ?? 0;
             }
 
-            // 4. Obtener el precio del tipo de lavado
+            // ==============================================================================
+            // NUEVA VALIDACIÓN: Verificar si el vehículo ya está en un box ocupado
+            // ==============================================================================
+            $existingActiveServiceForVehicle = ServicioLavado::where('vehiculo_id', $vehiculo->id)
+                                                             ->where('estado_servicio', 'en_curso')
+                                                             ->first();
+
+            if ($existingActiveServiceForVehicle) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'El vehículo seleccionado ya se encuentra en un box ocupado');
+            }
+            // ==============================================================================
+
+            // Obtener el precio del tipo de lavado
             $tipoLavado = TipoLavado::find($validatedData['tipo_lavado_id']);
             if (!$tipoLavado) {
                 throw new \Exception("Tipo de lavado no encontrado.");
             }
             $tipoLavadoPrecio = $tipoLavado->precio ?? 0;
 
-            // 5. Calcular el precio total del servicio
+            // Calcular el precio total del servicio
             $precioTotalServicio = $tipoLavadoPrecio + $tipoVehiculoPrecio;
 
-            // 6. Actualizar estado del box y crear el servicio
+            // Actualizar estado del box y crear el servicio
             $box->update(['estado' => 'ocupado']);
 
             ServicioLavado::create([
@@ -204,7 +201,7 @@ class ServicioLavadoController extends Controller
                 'administrador_id' => $validatedData['administrador_id'],
                 'fecha_hora_inicio' => now(),
                 'estado_servicio' => 'en_curso',
-                'precio_total_servicio' => $precioTotalServicio, // <-- ¡Aquí se guarda el precio calculado!
+                'precio_total_servicio' => $precioTotalServicio,
             ]);
 
             DB::commit();

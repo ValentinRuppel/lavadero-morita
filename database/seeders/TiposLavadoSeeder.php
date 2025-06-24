@@ -14,50 +14,50 @@ class TiposLavadoSeeder extends Seeder
     {
         DB::table('tipo_lavados')->insert([
             [
-                'nombre_lavado' => 'Lavado Básico',
-                'descripcion' => 'Lavado exterior rápido y secado.',
-                'precio' => 100.00,
-                'duracion_estimada' => 15, // 15 minutos
+                'nombre_lavado' => 'Lavado Rápido',
+                'descripcion' => 'Enjuague y jabón básico para remover suciedad superficial.',
+                'precio' => 5000.00,
+                'duracion_estimada' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre_lavado' => 'Espuma Activa',
+                'descripcion' => 'Aplicación de espuma con aclarado. Ideal para suciedad media.',
+                'precio' => 7000.00,
+                'duracion_estimada' => 4,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'nombre_lavado' => 'Lavado Completo',
-                'descripcion' => 'Lavado exterior, aspirado interior y limpieza de cristales.',
-                'precio' => 250.00,
-                'duracion_estimada' => 30, // 30 minutos
+                'descripcion' => 'Espuma + aclarado + cera rápida para acabado brillante.',
+                'precio' => 12000.00,
+                'duracion_estimada' => 5,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nombre_lavado' => 'Lavado Premium',
-                'descripcion' => 'Lavado completo, encerado a mano y acondicionamiento de interiores.',
-                'precio' => 500.00,
-                'duracion_estimada' => 60, // 60 minutos
+                'nombre_lavado' => 'Solo Cera',
+                'descripcion' => 'Aplicación de cera rápida para protección de pintura.',
+                'precio' => 6000.00,
+                'duracion_estimada' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nombre_lavado' => 'Lavado y Pulido',
-                'descripcion' => 'Lavado exterior detallado y pulido de carrocería.',
-                'precio' => 800.00,
-                'duracion_estimada' => 120, // 120 minutos
+                'nombre_lavado' => 'Limpieza de Llantas',
+                'descripcion' => 'Chorro a presión y desengrasante para llantas.',
+                'precio' => 5000.00,
+                'duracion_estimada' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nombre_lavado' => 'Detallado Interior',
-                'descripcion' => 'Limpieza profunda de tapicería, plásticos y alfombras.',
-                'precio' => 700.00,
-                'duracion_estimada' => 90, // 90 minutos
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'nombre_lavado' => 'Lavado de Motor',
-                'descripcion' => 'Limpieza y desengrasado del compartimento del motor.',
-                'precio' => 350.00,
-                'duracion_estimada' => 45, // 45 minutos
+                'nombre_lavado' => 'Combo Rápido Total',
+                'descripcion' => 'Incluye todas las etapas: espuma, aclarado, llantas y cera.',
+                'precio' => 15000.00,
+                'duracion_estimada' => 15,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
