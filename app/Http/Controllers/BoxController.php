@@ -170,7 +170,6 @@ class BoxController extends Controller
      */
     public function edit(Box $box)
     {
-        dd("hola");
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
                 ->with('error', 'No se puede editar un box que está ocupado.');
