@@ -50,11 +50,6 @@ const submit = () => {
 
                     <!-- Título con decoración -->
                     <div class="text-center mb-8 relative">
-                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full animate-float backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                                <span class="text-lg">✏️</span>
-                            </div>
-                        </div>
                         <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent mb-4 pt-6">
                             Editar Box: {{ props.box.nombre_box }}
                         </h2>

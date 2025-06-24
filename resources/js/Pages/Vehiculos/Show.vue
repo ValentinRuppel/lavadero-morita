@@ -21,12 +21,6 @@ const props = defineProps({
                     <div class="absolute bottom-12 left-6 w-2 h-2 bg-fuchsia-400/35 rounded-full animate-bounce" style="animation-delay: 1.5s"></div>
 
                     <div class="text-center mb-8 relative">
-                        <!-- Elemento decorativo superior flotante -->
-                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full animate-float backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                                <span class="text-lg">🚗</span>
-                            </div>
-                        </div>
 
                         <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent mb-4 pt-6">
                             Detalles del Vehículo

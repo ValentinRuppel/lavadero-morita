@@ -246,7 +246,7 @@
                                 <span class="text-2xl font-bold text-purple-200">$6,000</span>
                             </div>
                         </div>
-                        
+
                         <div
                             class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
                             <h3 class="text-xl font-bold text-white mb-4 text-center">Limpieza de LLantas</h3>
@@ -272,6 +272,39 @@
                 </div>
             </section>
 
+            <section>
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                        <span class="bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
+                            Vehículos
+                        </span>
+                    </h2>
+                    <div class="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 mx-auto rounded-full"></div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-12 items-center max-w-5xl mx-auto">
+                    <div
+                        class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
+                        <h3 class="text-xl font-bold text-white mb-4 text-center">Moto</h3>
+                        <div class="text-center">
+                            <span class="text-2xl font-bold text-purple-200">$2,500</span>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
+                        <h3 class="text-xl font-bold text-white mb-4 text-center">Auto</h3>
+                        <div class="text-center">
+                            <span class="text-2xl font-bold text-purple-200">$5,000</span>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/20 hover:transform hover:scale-105 transition-all duration-300">
+                        <h3 class="text-xl font-bold text-white mb-4 text-center">Camioneta</h3>
+                        <div class="text-center">
+                            <span class="text-2xl font-bold text-purple-200">$7,500</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
             <!-- Footer / Contacto -->
             <footer class="py-12 px-6 bg-gradient-to-t from-purple-900 to-transparent">
                 <div class="max-w-4xl mx-auto text-center">

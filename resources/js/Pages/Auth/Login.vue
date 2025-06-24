@@ -27,7 +27,7 @@ const isSubmitting = ref(false)
 onMounted(() => {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('registered')) {
-        registrationSuccess.value = '¡Cuenta creada exitosamente! Ya puedes iniciar sesión con tus credenciales.'
+        registrationSuccess.value = '¡Tu cuenta ya estába creada! Ya puedes iniciar sesión con tus credenciales.'
         // Limpiar la URL después de mostrar el mensaje
         window.history.replaceState({}, document.title, window.location.pathname)
     }
@@ -81,6 +81,7 @@ const submit = () => {
 </script>
 
 <template>
+
     <Head title="Ingreso Cliente" />
     <GuestLayout>
         <!-- Contenido principal -->
@@ -102,7 +103,8 @@ const submit = () => {
                 <h2 class="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión</h2>
 
                 <!-- Mensaje de registro exitoso -->
-                <div v-if="registrationSuccess" class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg animate-pulse">
+                <div v-if="registrationSuccess"
+                    class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg animate-pulse">
                     <p class="text-sm font-medium text-green-100">{{ registrationSuccess }}</p>
                 </div>
 
@@ -117,9 +119,11 @@ const submit = () => {
                 </div>
 
                 <!-- Debug: Mostrar todos los errores del formulario (solo en desarrollo) -->
-                <div v-if="Object.keys(form.errors).length > 0" class="mb-4 p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
+                <div v-if="Object.keys(form.errors).length > 0"
+                    class="mb-4 p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
                     <p class="text-sm font-medium text-yellow-100">Debug - Errores del formulario:</p>
-                    <pre class="text-xs text-yellow-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(form.errors, null, 2) }}</pre>
+                    <pre
+                        class="text-xs text-yellow-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(form.errors, null, 2) }}</pre>
                 </div>
 
 
@@ -130,9 +134,8 @@ const submit = () => {
                         <div class="relative">
                             <TextInput id="email" type="email"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
-                                :class="{ 'border-red-400': form.errors.email || loginError }"
-                                v-model="form.email" required autofocus autocomplete="username"
-                                placeholder="tu@email.com" />
+                                :class="{ 'border-red-400': form.errors.email || loginError }" v-model="form.email"
+                                required autofocus autocomplete="username" placeholder="tu@email.com" />
                         </div>
                         <InputError class="mt-2 text-pink-200" :message="form.errors.email" />
                     </div>
@@ -150,21 +153,6 @@ const submit = () => {
                         <InputError class="mt-2 text-pink-200" :message="form.errors.password" />
                     </div>
 
-                    <!-- Remember me -->
-                    <div class="flex items-center">
-                        <Checkbox name="remember" v-model:checked="form.remember"
-                            class="text-purple-400 focus:ring-purple-400 focus:ring-offset-purple-900" />
-                        <span class="ml-2 text-sm text-purple-100">Recordarme</span>
-                    </div>
-
-                    <!-- Forgot password link -->
-                    <div class="text-center">
-                        <Link v-if="canResetPassword" :href="route('password.request')"
-                            class="text-sm text-purple-200 hover:text-purple-100 underline transition-colors duration-200">
-                        ¿Olvidaste tu contraseña?
-                        </Link>
-                    </div>
-
                     <!-- Submit button -->
                     <PrimaryButton type="submit" :disabled="form.processing || isSubmitting"
                         class="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-purple-400/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
@@ -178,6 +166,15 @@ const submit = () => {
                         </span>
                     </PrimaryButton>
                 </form>
+                <!-- Additional info -->
+                <div class="mt-6 text-center">
+                    <p class="text-purple-200 text-sm">
+                        ¿No tienes cuenta?
+                        <Link href="/register" class="text-purple-100 hover:text-white underline font-medium">
+                        Regístrate aquí
+                        </Link>
+                    </p>
+                </div>
 
                 <!-- Divider -->
                 <div class="my-6 flex items-center">
@@ -196,15 +193,6 @@ const submit = () => {
             </div>
             <br>
             <br>
-            <!-- Additional info -->
-            <div class="mt-6 text-center">
-                <p class="text-purple-200 text-sm">
-                    ¿No tienes cuenta?
-                    <Link href="/register" class="text-purple-100 hover:text-white underline font-medium">
-                    Regístrate aquí
-                    </Link>
-                </p>
-            </div>
         </div>
     </GuestLayout>
 </template>
@@ -221,9 +209,12 @@ input:focus::placeholder {
 
 /* Animaciones de burbujas */
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-10px);
     }
