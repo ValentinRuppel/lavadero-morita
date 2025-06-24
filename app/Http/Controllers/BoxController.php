@@ -28,7 +28,7 @@ class BoxController extends Controller
         }]);
         $user = $request->user();
         $tabla = $user->getTable();
-        
+
         if ($tabla === 'administrators') {
             // Retorna la vista de Inertia con los datos de los boxes
             return Inertia::render('Boxes/Index', [

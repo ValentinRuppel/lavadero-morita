@@ -64,7 +64,7 @@ defineProps({
         <Link href="/dashboard" class="group relative">
           <div class="absolute inset-0 bg-purple-300/20 rounded-lg blur-sm group-hover:blur-md transition-all duration-300"></div>
           <div class="relative bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent text-2xl font-black tracking-wide hover:scale-105 transition-transform duration-300">
-            ✨ Morita Lavadero
+            Morita Lavadero
           </div>
         </Link>
 
