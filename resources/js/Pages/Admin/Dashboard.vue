@@ -48,7 +48,7 @@ defineProps({
               class="group relative flex items-center justify-center p-4 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-100 rounded-lg transition-all duration-300 transform hover:scale-105 border border-indigo-400/20 backdrop-blur-sm"
             >
               <span class="relative z-10 flex items-center gap-2 text-lg font-bold">
-                📋 Ver Mis Servicios
+                Ver Mis Servicios
               </span>
               <div class="absolute inset-0 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
@@ -58,7 +58,7 @@ defineProps({
               class="group relative flex items-center justify-center p-4 bg-green-500/20 hover:bg-green-500/30 text-green-100 rounded-lg transition-all duration-300 transform hover:scale-105 border border-green-400/20 backdrop-blur-sm"
             >
               <span class="relative z-10 flex items-center gap-2 text-lg font-bold">
-                🏠 Administrar Boxes
+                Administrar Boxes
               </span>
               <div class="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>

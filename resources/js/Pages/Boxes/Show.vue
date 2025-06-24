@@ -278,11 +278,6 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
 
           <!-- Título con decoración -->
           <div class="text-center mb-8 relative">
-            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <div class="w-12 h-12 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full animate-float backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                <span class="text-lg">🧼</span>
-              </div>
-            </div>
             <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent mb-4 pt-6">
               Detalle del Box: {{ props.box.nombre_box }}
             </h2>
@@ -341,15 +336,15 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
           </div>
 
           <!-- SECCIÓN DE INICIAR NUEVO SERVICIO (BOX ACTIVO) -->
-          <div v-else-if="props.box.estado === 'activo'" class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-            <h4 class="text-lg font-semibold text-green-800 mb-4">Iniciar Nuevo Servicio:</h4>
+          <div v-else-if="props.box.estado === 'activo'" class="mt-6 p-4 bg-indigo-500/10 rounded-lg border border-indigo-400/20">
+            <h4 class="text-lg font-semibold text-indigo-100 mb-2">Iniciar Nuevo Servicio:</h4>
             <form @submit.prevent="submitStartService" class="space-y-4">
               <div class="relative">
-                <InputLabel for="email_input" value="Buscar Cliente por Email o Nombre" />
+                <InputLabel for="email_input" value="Buscar Cliente por Email o Nombre" class="text-indigo-200 text-sm" />
                 <TextInput
                   id="email_input"
                   type="text"
-                  class="mt-1 block w-full"
+                  class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
                   v-model="emailInput"
                   @focus="showClientSuggestions = true"
                   @blur="setTimeout(() => showClientSuggestions = false, 200)"
@@ -376,17 +371,17 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
               </div>
 
               <div v-if="selectedClientId && !newClientVehicle">
-                <InputLabel for="vehiculo_id" value="Seleccionar Vehículo" />
+                <InputLabel for="vehiculo_id" value="Seleccionar Vehículo" class="text-indigo-200 text-sm"/>
                 <select
                   id="vehiculo_id"
-                  class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full"
+                  class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"
                   v-model="startServiceForm.vehiculo_id"
                   required
                   :disabled="availableVehicles.length === 0"
                 >
-                  <option value="">Seleccione un vehículo</option>
+                  <option value="" class="bg-purple-800/50">Seleccione un vehículo</option>
                   <option v-if="availableVehicles.length === 0" disabled>No hay vehículos para este cliente.</option>
-                  <option v-for="vehiculo in availableVehicles" :key="vehiculo.id" :value="vehiculo.id">
+                  <option v-for="vehiculo in availableVehicles" :key="vehiculo.id" :value="vehiculo.id" class="bg-purple-800/50">
                     {{ vehiculo.patente }} {{ vehiculo.modelo.marca.nombre }} {{ vehiculo.modelo.nombre }} {{ vehiculo.anio }}
                   </option>
                 </select>
@@ -441,7 +436,7 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                 </div>
               </div>
               <div class="mt-4">
-                <InputLabel for="tipo_lavado_id" value="Tipo de Lavado" class="text-purple-100" />
+                <InputLabel for="tipo_lavado_id" value="Tipo de Lavado" class="text-indigo-200 text-sm" />
                 <select
                   id="tipo_lavado_id"
                   class="bg-white/10 border border-purple-300/20 text-purple-100 rounded-md shadow-sm mt-1 block w-full focus:ring-purple-500 focus:border-purple-500 backdrop-blur-sm"

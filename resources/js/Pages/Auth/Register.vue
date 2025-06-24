@@ -56,20 +56,20 @@ const passwordConfirmationValidation = computed(() => {
 // Validar si el formulario es válido
 const isFormValid = computed(() => {
     return form.name &&
-           form.email &&
-           form.password &&
-           form.password_confirmation &&
-           !nameValidation.value &&
-           !emailValidation.value &&
-           !passwordValidation.value &&
-           !passwordConfirmationValidation.value
+        form.email &&
+        form.password &&
+        form.password_confirmation &&
+        !nameValidation.value &&
+        !emailValidation.value &&
+        !passwordValidation.value &&
+        !passwordConfirmationValidation.value
 })
 
 // Verificar si hay mensaje de éxito desde el backend
 onMounted(() => {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('success')) {
-        registerSuccess.value = 'Cuenta creada exitosamente. Ya puedes iniciar sesión.'
+        registerSuccess.value = 'Redirigiendo.'
     }
 })
 
@@ -150,6 +150,7 @@ function clearFieldError(field) {
 </script>
 
 <template>
+
     <Head title="Registro Cliente" />
     <GuestLayout>
         <!-- Contenido principal -->
@@ -171,25 +172,31 @@ function clearFieldError(field) {
                 <h2 class="text-2xl font-bold text-white mb-6 text-center">Crea tu Cuenta</h2>
 
                 <!-- Mensaje de éxito -->
-                <div v-if="registerSuccess" class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg animate-pulse">
+                <div v-if="registerSuccess"
+                    class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-lg animate-pulse">
                     <p class="text-sm font-medium text-green-100">{{ registerSuccess }}</p>
                 </div>
 
                 <!-- Mensaje de error personalizado -->
-                <div v-if="registerError" class="mb-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg animate-pulse">
+                <div v-if="registerError"
+                    class="mb-4 p-3 bg-red-500/20 border border-red-400/30 rounded-lg animate-pulse">
                     <p class="text-sm font-medium text-red-100">{{ registerError }}</p>
                 </div>
 
                 <!-- Debug: Mostrar todos los errores del formulario -->
-                <div v-if="Object.keys(form.errors).length > 0" class="mb-4 p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
+                <div v-if="Object.keys(form.errors).length > 0"
+                    class="mb-4 p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
                     <p class="text-sm font-medium text-yellow-100">Errores del backend:</p>
-                    <pre class="text-xs text-yellow-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(form.errors, null, 2) }}</pre>
+                    <pre
+                        class="text-xs text-yellow-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(form.errors, null, 2) }}</pre>
                 </div>
 
                 <!-- Debug: Errores de frontend -->
-                <div v-if="Object.keys(frontendErrors).length > 0" class="mb-4 p-3 bg-orange-500/20 border border-orange-400/30 rounded-lg">
+                <div v-if="Object.keys(frontendErrors).length > 0"
+                    class="mb-4 p-3 bg-orange-500/20 border border-orange-400/30 rounded-lg">
                     <p class="text-sm font-medium text-orange-100">Errores de validación:</p>
-                    <pre class="text-xs text-orange-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(frontendErrors, null, 2) }}</pre>
+                    <pre
+                        class="text-xs text-orange-100 mt-1 whitespace-pre-wrap">{{ JSON.stringify(frontendErrors, null, 2) }}</pre>
                 </div>
 
                 <form @submit.prevent="submit" class="space-y-6">
@@ -200,12 +207,11 @@ function clearFieldError(field) {
                             <TextInput id="name" type="text"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
                                 :class="{ 'border-red-400': form.errors.name || frontendErrors.name || nameValidation }"
-                                v-model="form.name"
-                                @input="clearFieldError('name')"
-                                required autofocus autocomplete="name"
-                                placeholder="Tu nombre completo" />
+                                v-model="form.name" @input="clearFieldError('name')" required autofocus
+                                autocomplete="name" placeholder="Tu nombre completo" />
                         </div>
-                        <InputError class="mt-2 text-pink-200" :message="form.errors.name || frontendErrors.name || nameValidation" />
+                        <InputError class="mt-2 text-pink-200"
+                            :message="form.errors.name || frontendErrors.name || nameValidation" />
                     </div>
 
                     <!-- Email -->
@@ -215,12 +221,11 @@ function clearFieldError(field) {
                             <TextInput id="email" type="email"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
                                 :class="{ 'border-red-400': form.errors.email || frontendErrors.email || emailValidation }"
-                                v-model="form.email"
-                                @input="clearFieldError('email')"
-                                required autocomplete="username"
+                                v-model="form.email" @input="clearFieldError('email')" required autocomplete="username"
                                 placeholder="tu@email.com" />
                         </div>
-                        <InputError class="mt-2 text-pink-200" :message="form.errors.email || frontendErrors.email || emailValidation" />
+                        <InputError class="mt-2 text-pink-200"
+                            :message="form.errors.email || frontendErrors.email || emailValidation" />
                     </div>
 
                     <!-- Password -->
@@ -230,12 +235,11 @@ function clearFieldError(field) {
                             <TextInput id="password" type="password"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
                                 :class="{ 'border-red-400': form.errors.password || frontendErrors.password || passwordValidation }"
-                                v-model="form.password"
-                                @input="clearFieldError('password')"
-                                required autocomplete="new-password"
-                                placeholder="••••••••" />
+                                v-model="form.password" @input="clearFieldError('password')" required
+                                autocomplete="new-password" placeholder="••••••••" />
                         </div>
-                        <InputError class="mt-2 text-pink-200" :message="form.errors.password || frontendErrors.password || passwordValidation" />
+                        <InputError class="mt-2 text-pink-200"
+                            :message="form.errors.password || frontendErrors.password || passwordValidation" />
 
                         <!-- Indicadores de fortaleza de contraseña -->
                         <div v-if="form.password" class="mt-2 space-y-1">
@@ -258,22 +262,21 @@ function clearFieldError(field) {
 
                     <!-- Confirmar Password -->
                     <div class="space-y-2">
-                        <InputLabel for="password_confirmation" value="Confirmar contraseña" class="text-purple-100 font-medium" />
+                        <InputLabel for="password_confirmation" value="Confirmar contraseña"
+                            class="text-purple-100 font-medium" />
                         <div class="relative">
                             <TextInput id="password_confirmation" type="password"
                                 class="mt-1 block w-full pl-10 bg-white/10 border-purple-300/30 text-white placeholder-purple-200 focus:border-purple-400 focus:ring-purple-400 rounded-lg backdrop-blur-sm"
                                 :class="{ 'border-red-400': frontendErrors.password_confirmation || passwordConfirmationValidation }"
-                                v-model="form.password_confirmation"
-                                @input="clearFieldError('password_confirmation')"
-                                required autocomplete="new-password"
-                                placeholder="••••••••" />
+                                v-model="form.password_confirmation" @input="clearFieldError('password_confirmation')"
+                                required autocomplete="new-password" placeholder="••••••••" />
                         </div>
-                        <InputError class="mt-2 text-pink-200" :message="frontendErrors.password_confirmation || passwordConfirmationValidation" />
+                        <InputError class="mt-2 text-pink-200"
+                            :message="frontendErrors.password_confirmation || passwordConfirmationValidation" />
                     </div>
 
                     <!-- Submit button -->
-                    <PrimaryButton type="submit"
-                        :disabled="form.processing || isSubmitting || !isFormValid"
+                    <PrimaryButton type="submit" :disabled="form.processing || isSubmitting || !isFormValid"
                         class="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-purple-400/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                         <span v-if="form.processing || isSubmitting" class="flex items-center justify-center gap-2">
                             <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin">
@@ -287,11 +290,19 @@ function clearFieldError(field) {
 
                     <!-- Mensaje de validación del botón -->
                     <div v-if="!isFormValid && (form.name || form.email || form.password || form.password_confirmation)"
-                         class="text-center text-sm text-purple-200">
+                        class="text-center text-sm text-purple-200">
                         Complete todos los campos correctamente para continuar
                     </div>
                 </form>
-
+                <!-- Additional info -->
+                <div class="mt-6 text-center">
+                    <p class="text-purple-200 text-sm">
+                        ¿Ya tienes cuenta?
+                        <Link href="/login" class="text-purple-100 hover:text-white underline font-medium">
+                        Inicia sesión aquí
+                        </Link>
+                    </p>
+                </div>
                 <!-- Divider -->
                 <div class="my-6 flex items-center">
                     <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
@@ -303,21 +314,12 @@ function clearFieldError(field) {
                 <div class="text-center">
                     <Link href="/"
                         class="inline-flex items-center gap-2 text-purple-200 hover:text-purple-100 text-sm transition-colors duration-200">
-                        ← Volver al inicio
+                    ← Volver al inicio
                     </Link>
                 </div>
             </div>
             <br>
             <br>
-            <!-- Additional info -->
-            <div class="mt-6 text-center">
-                <p class="text-purple-200 text-sm">
-                    ¿Ya tienes cuenta?
-                    <Link href="/login" class="text-purple-100 hover:text-white underline font-medium">
-                        Inicia sesión aquí
-                    </Link>
-                </p>
-            </div>
         </div>
     </GuestLayout>
 </template>
@@ -334,9 +336,12 @@ input:focus::placeholder {
 
 /* Animaciones de burbujas */
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-10px);
     }
