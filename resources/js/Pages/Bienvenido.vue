@@ -164,8 +164,7 @@
                                 </h3>
                                 <p class="text-purple-100 leading-relaxed">
                                     Brindar el mejor servicio de lavado y cuidado automotriz, prestamos los mejores
-                                    productos
-                                    y un equipo altamente capacitado para superar las expectativas de nuestros clientes.
+                                    productos para que el cliente pueda usarlos a su gusto.
                                 </p>
                             </div>
                         </div>

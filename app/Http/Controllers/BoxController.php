@@ -17,15 +17,17 @@ class BoxController extends Controller
      */
     public function index(Request $request)
     {
-        // Obtiene todos los boxes, ordenados por nombre
-        $boxes = Box::orderBy('nombre_box')->get();
+        // Obtiene todos los boxes, ordenados por estado (activo primero) y luego por nombre
+        $boxes = Box::orderByRaw("estado = 'activo' DESC")
+                    ->orderBy('nombre_box')
+                    ->get();
 
-        // Puedes cargar también información de servicios en curso para cada box
-        // Esto es un ejemplo, ajusta las relaciones si necesitas más datos
+        // Carga información de servicios en curso para cada box
         $boxes->load(['serviciosLavado' => function ($query) {
             $query->where('estado_servicio', 'en_curso')
-                ->with(['vehiculo', 'tipoLavado', 'administrador']); // Carga las relaciones necesarias para el servicio
+                  ->with(['vehiculo.user', 'vehiculo.tipoVehiculo', 'vehiculo.modelo.marca', 'tipoLavado', 'administrador']);
         }]);
+
         $user = $request->user();
         $tabla = $user->getTable();
 
@@ -40,13 +42,39 @@ class BoxController extends Controller
                         'nombre_box' => $box->nombre_box,
                         'descripcion' => $box->descripcion,
                         'estado' => $box->estado,
-                        'servicio_en_curso' => $box->serviciosLavado->first(), // Obtiene el primer servicio en curso (asumiendo uno por box)
-                        'created_at' => $box->created_at->diffForHumans(), // Formatear fechas si es necesario
+                        'servicio_en_curso' => $box->serviciosLavado->first() ? [
+                            'id' => $box->serviciosLavado->first()->id,
+                            'vehiculo' => $box->serviciosLavado->first()->vehiculo ? [
+                                'id' => $box->serviciosLavado->first()->vehiculo->id,
+                                'patente' => $box->serviciosLavado->first()->vehiculo->patente,
+                                'marca' => $box->serviciosLavado->first()->vehiculo->modelo->marca->nombre ?? $box->serviciosLavado->first()->vehiculo->marca,
+                                'modelo' => $box->serviciosLavado->first()->vehiculo->modelo->nombre ?? $box->serviciosLavado->first()->vehiculo->modelo,
+                                'anio' => $box->serviciosLavado->first()->vehiculo->anio,
+                                'cliente_nombre' => $box->serviciosLavado->first()->vehiculo->user->name ?? 'N/A',
+                                'tipo_vehiculo' => $box->serviciosLavado->first()->vehiculo->tipoVehiculo->nombre ?? 'N/A',
+                                'tipo_vehiculo_precio' => $box->serviciosLavado->first()->vehiculo->tipoVehiculo->precio ?? 0,
+                            ] : null,
+                            'tipo_lavado' => $box->serviciosLavado->first()->tipoLavado ? [
+                                'id' => $box->serviciosLavado->first()->tipoLavado->id,
+                                'nombre_lavado' => $box->serviciosLavado->first()->tipoLavado->nombre_lavado,
+                                'precio' => $box->serviciosLavado->first()->tipoLavado->precio,
+                                'duracion_estimada' => $box->serviciosLavado->first()->tipoLavado->duracion_estimada,
+                            ] : null,
+                            'administrador' => $box->serviciosLavado->first()->administrador ? [
+                                'id' => $box->serviciosLavado->first()->administrador->id,
+                                'name' => $box->serviciosLavado->first()->administrador->name,
+                            ] : null,
+                            'fecha_hora_inicio' => $box->serviciosLavado->first()->fecha_hora_inicio,
+                            'precio_total_servicio' => $box->serviciosLavado->first()->precio_total_servicio,
+                            'estado_servicio' => $box->serviciosLavado->first()->estado_servicio,
+                        ] : null,
+                        'created_at' => $box->created_at->diffForHumans(),
                         'updated_at' => $box->updated_at->diffForHumans(),
                     ];
                 }),
             ]);
         }
+
         return redirect()->route('dashboard');
     }
 
@@ -168,14 +196,16 @@ class BoxController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Box $box)
+    public function edit(Box $box, Request $request)
     {
+        $user = $request->user();
         if ($box->estado === 'ocupado') {
             return redirect()->route('boxes.index')
                 ->with('error', 'No se puede editar un box que está ocupado.');
         }
         return Inertia::render('Boxes/Edit', [
             'box' => $box,
+            'user' => $user,
         ]);
     }
 

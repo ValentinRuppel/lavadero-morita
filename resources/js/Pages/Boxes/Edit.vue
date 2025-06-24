@@ -37,7 +37,7 @@ const submit = () => {
 <template>
     <Head :title="'Editar Box: ' + props.box.nombre_box" />
 
-    <AppLayout :user="user">
+    <AppLayout :user="user">        
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Tarjeta principal con glassmorphism -->
@@ -95,8 +95,8 @@ const submit = () => {
                                 class="mt-1 block w-full bg-white/10 border-purple-300/30 text-purple-100 focus:border-purple-500 focus:ring-purple-500 rounded-md shadow-sm"
                                 v-model="form.estado"
                             >
-                                <option value="activo">Activo</option>
-                                <option value="mantenimiento">Mantenimiento</option>
+                                <option value="activo" class="bg-purple-800/50">Activo</option>
+                                <option value="mantenimiento" class="bg-purple-800/50">Mantenimiento</option>
                             </select>
                             <InputError class="mt-2 text-red-200" :message="form.errors.estado" />
                         </div>

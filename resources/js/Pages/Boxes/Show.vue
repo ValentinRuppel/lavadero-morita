@@ -455,9 +455,6 @@ const currentServiceTotal = computed(() => props.box.servicio_en_curso?.precio_t
                                     class="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm"
                                     :disabled="startServiceForm.processing">
                                     <span class="relative z-10 flex items-center gap-2">➕ Iniciar Servicio</span>
-                                    <div
-                                        class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
-                                    </div>
                                 </button>
                             </div>
                         </form>
