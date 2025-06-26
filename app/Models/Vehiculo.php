@@ -43,9 +43,4 @@ class Vehiculo extends Model
         return $this->belongsTo(Modelo::class);
     }
 
-    // Si también quieres acceder directamente a la marca desde el vehículo
-    // public function marca()
-    // {
-    //     return $this->hasOneThrough(Marca::class, Modelo::class);
-    // }
 }

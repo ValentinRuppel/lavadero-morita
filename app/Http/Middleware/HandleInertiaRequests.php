@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Illuminate\Support\Facades\Auth; // Añade esta línea si no está
+use Illuminate\Support\Facades\Auth; 
 
 class HandleInertiaRequests extends Middleware
 {
@@ -41,7 +41,6 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
-                // Puedes añadir otros tipos de mensajes si los usas, ej: 'info', 'warning'
             ],
             'user' => fn () => $request->user()
                 ? array_merge($request->user()->toArray(), [

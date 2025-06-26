@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre_lavado')->unique();
             $table->text('descripcion')->nullable();
-            $table->decimal('precio', 8, 2); // 8 dígitos en total, 2 después del punto decimal
-            $table->integer('duracion_estimada')->comment('Duración en minutos'); // Duración en minutos
+            $table->decimal('precio', 8, 2);
+            $table->integer('duracion_estimada')->comment('Duración en minutos');
             $table->timestamps();
         });
     }

@@ -21,7 +21,7 @@ const resetError = ref('');
 const isSubmitting = ref(false);
 
 const submit = () => {
-    resetError.value = ''; // Limpiar errores previos
+    resetError.value = '';
     isSubmitting.value = true;
 
     form.post(route('password.email'), {
@@ -29,14 +29,13 @@ const submit = () => {
             isSubmitting.value = false;
         },
         onError: (errors) => {
-            console.log('Errores recibidos:', errors); // Para debugging
+            console.log('Errores recibidos:', errors); 
 
             if (errors.email) {
                 resetError.value = errors.email;
             } else if (errors.message) {
                 resetError.value = errors.message;
             } else {
-                // Si hay cualquier error, mostrar mensaje específico
                 const errorKeys = Object.keys(errors);
                 if (errorKeys.length > 0) {
                     resetError.value = errors[errorKeys[0]] || 'No se pudo enviar el enlace de recuperación. Verifica tu correo electrónico.';

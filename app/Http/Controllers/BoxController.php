@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Box;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\User; // Para los clientes
-use App\Models\TipoLavado; // ¡Importa el modelo TipoLavado!
-use App\Models\Vehiculo; // ¡Importa el modelo Vehiculo! (Si vas a permitir registrarlo en el mismo formulario)
-use Illuminate\Support\Facades\Auth; // Para obtener el administrador logueado
+use App\Models\User; 
+use App\Models\TipoLavado;
+use App\Models\Vehiculo;
+use Illuminate\Support\Facades\Auth;
 
 class BoxController extends Controller
 {
@@ -17,12 +17,9 @@ class BoxController extends Controller
      */
     public function index(Request $request)
     {
-        // Obtiene todos los boxes, ordenados por estado (activo primero) y luego por nombre
         $boxes = Box::orderByRaw("estado = 'activo' DESC")
                     ->orderBy('nombre_box')
                     ->get();
-
-        // Carga información de servicios en curso para cada box
         $boxes->load(['serviciosLavado' => function ($query) {
             $query->where('estado_servicio', 'en_curso')
                   ->with(['vehiculo.user', 'vehiculo.tipoVehiculo', 'vehiculo.modelo.marca', 'tipoLavado', 'administrador']);
@@ -32,11 +29,9 @@ class BoxController extends Controller
         $tabla = $user->getTable();
 
         if ($tabla === 'administrators') {
-            // Retorna la vista de Inertia con los datos de los boxes
             return Inertia::render('Boxes/Index', [
                 'user' => $user,
                 'boxes' => $boxes->map(function ($box) {
-                    // Mapea los boxes para incluir solo los servicios en curso y formatear datos
                     return [
                         'id' => $box->id,
                         'nombre_box' => $box->nombre_box,
@@ -83,7 +78,6 @@ class BoxController extends Controller
      */
     public function create()
     {
-        // Aquí podrías retornar la vista para crear un nuevo box
         return Inertia::render('Boxes/Create');
     }
 
@@ -95,7 +89,6 @@ class BoxController extends Controller
         $validated = $request->validate([
             'nombre_box' => 'required|string|max:255|unique:boxes',
             'descripcion' => 'nullable|string|max:1000',
-            // El estado por defecto es 'disponible', no es necesario validarlo aquí si no se permite cambiarlo al crear
         ]);
 
         Box::create($validated);
@@ -109,22 +102,17 @@ class BoxController extends Controller
      */
     public function show(Box $box, Request $request)
     {
-        // 1. Carga los servicios en curso para el box
-        //    Asegura cargar 'vehiculo.modelo.marca' para acceder a la marca desde el modelo del vehículo
         $box->load(['serviciosLavado' => function ($query) {
             $query->where('estado_servicio', 'en_curso')
-                  ->with(['vehiculo.user', 'vehiculo.tipoVehiculo','vehiculo.modelo.marca', 'tipoLavado', 'administrador']); // Asegura cargar tipoVehiculo
+                  ->with(['vehiculo.user', 'vehiculo.tipoVehiculo','vehiculo.modelo.marca', 'tipoLavado', 'administrador']);
         }]);
 
         $tiposLavado = TipoLavado::orderBy('nombre_lavado')->get();
 
-        // 2. Cargar los clientes y sus vehículos, y las relaciones necesarias de los vehículos
-        //    Asegura cargar solo clientes que tienen al menos un vehículo
         $clientes = User::with(['vehiculos.modelo.marca', 'vehiculos.tipoVehiculo'])
-                         ->has('vehiculos') // <-- ¡AGREGADO: Filtra solo clientes con vehículos!
+                         ->has('vehiculos')
                          ->orderBy('name')
                          ->get();
-        // 3. Determinar si el usuario logueado es un administrador
         $user = $request->user();
         $tabla = $user->getTable();
         $isAdmin = $tabla !== 'users';
@@ -178,8 +166,8 @@ class BoxController extends Controller
                 'vehiculos' => $cliente->vehiculos->map(fn($v) => [
                     'id' => $v->id,
                     'patente' => $v->patente,
-                    'marca' => $v->marca, // Esta es la marca directa del vehículo, el 'display' usa la del modelo
-                    'modelo' => $v->modelo, // Este es el modelo directo del vehículo, el 'display' usa la del modelo
+                    'marca' => $v->marca,
+                    'modelo' => $v->modelo,
                     'anio' => $v->anio,
                     'display' => $v->patente . ' ' . ($v->modelo->marca->nombre ?? $v->marca) . ' ' . ($v->modelo->nombre ?? $v->modelo) . ' ' . $v->anio,
                     'tipo_vehiculo_id' => $v->tipo_vehiculo_id,

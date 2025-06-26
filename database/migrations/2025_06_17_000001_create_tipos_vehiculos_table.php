@@ -15,8 +15,8 @@ class CreateTiposVehiculosTable extends Migration
     {
         Schema::create('tipos_vehiculos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique(); // Ej: "Coche", "Moto", "Camioneta"
-            $table->decimal('precio', 10, 2); // Precio asociado a este tipo de vehículo
+            $table->string('nombre')->unique();
+            $table->decimal('precio', 10, 2);
             $table->timestamps();
         });
     }

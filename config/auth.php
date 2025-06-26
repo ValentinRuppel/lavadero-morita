@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web', // El guardia por defecto para clientes
+        'guard' => 'web',
         'passwords' => 'users',
     ],
 
@@ -34,13 +34,13 @@ return [
     */
 
     'guards' => [
-        'web' => [ // Guardia para clientes (tabla 'users')
+        'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'admin' => [ // <-- ¡NUEVO GUARDIA PARA ADMINISTRADORES!
+        'admin' => [
             'driver' => 'session',
-            'provider' => 'administrators', // Hace referencia al nuevo proveedor
+            'provider' => 'administrators',
         ],
         'sanctum' => [
             'driver' => 'sanctum',
@@ -65,11 +65,11 @@ return [
     */
 
     'providers' => [
-        'users' => [ // Proveedor para clientes (tabla 'users')
+        'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-        'administrators' => [ // <-- ¡NUEVO PROVEEDOR PARA ADMINISTRADORES!
+        'administrators' => [
             'driver' => 'eloquent',
             'model' => App\Models\Administrator::class,
         ],

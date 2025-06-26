@@ -14,7 +14,7 @@ class Modelo extends Model
         'nombre',
         'anio_inicio',
         'anio_fin',
-        'tipo_vehiculo_id', // <-- ¡Añade esta línea!
+        'tipo_vehiculo_id',
     ];
 
     /**

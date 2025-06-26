@@ -49,18 +49,13 @@ class LoginRequest extends FormRequest
             RateLimiter::clear($this->throttleKey());
             return;
         }
-
-        // Si el login con 'admin' falla, intenta con el guardia 'web' (para usuarios normales)
         if (! Auth::guard('web')->attempt($credentials, $remember)) {
-            // Si ambos fallan, incrementa el rate limiter y lanza la excepción.
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
         }
-
-        // Si el login con 'web' es exitoso, limpia el rate limiter.
         RateLimiter::clear($this->throttleKey());
     }
 

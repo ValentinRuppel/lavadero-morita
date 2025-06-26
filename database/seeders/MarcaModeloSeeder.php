@@ -15,15 +15,10 @@ class MarcaModeloSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get the current year dynamically
         $currentYear = date('Y');
-
-        // Obtener los IDs de los tipos de vehículo existentes
-        // Ajusta estos IDs según tus datos reales
         $autoTypeId = TipoVehiculo::where('nombre', 'Auto')->first()->id ?? 1;
         $motoTypeId = TipoVehiculo::where('nombre', 'Moto')->first()->id ?? 2;
         $camionetaTypeId = TipoVehiculo::where('nombre', 'Camioneta')->first()->id ?? 3;
-        // Añade más si tienes otros tipos...
 
         $marcas = [
             'Toyota' => [
@@ -87,10 +82,9 @@ class MarcaModeloSeeder extends Seeder
             $marca = Marca::firstOrCreate(['nombre' => $marcaNombre]);
 
             foreach ($modelosData as $modeloData) {
-                // Determine the 'anio_fin' value
                 $anioFinValue = $modeloData['anio_fin'] ?? $currentYear;
 
-                Modelo::updateOrCreate( // Changed to updateOrCreate to ensure anio_fin is updated if needed
+                Modelo::updateOrCreate(
                     [
                         'marca_id' => $marca->id,
                         'nombre' => $modeloData['nombre'],
@@ -98,7 +92,7 @@ class MarcaModeloSeeder extends Seeder
                     [
                         'tipo_vehiculo_id' => $modeloData['tipo_vehiculo_id'],
                         'anio_inicio' => $modeloData['anio_inicio'],
-                        'anio_fin' => $anioFinValue, // Use the determined anio_fin value
+                        'anio_fin' => $anioFinValue,
                     ]
                 );
             }

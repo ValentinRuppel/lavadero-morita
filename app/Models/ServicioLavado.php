@@ -47,6 +47,6 @@ class ServicioLavado extends Model
      */
     public function administrador(): BelongsTo
     {
-        return $this->belongsTo(Administrator::class, 'administrador_id'); // ¡CAMBIO AQUÍ!
+        return $this->belongsTo(Administrator::class, 'administrador_id');
     }
 }

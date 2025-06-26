@@ -42,8 +42,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    // Relación con Vehiculos
     public function vehiculos()
         {
             return $this->hasMany(Vehiculo::class, 'user_id');

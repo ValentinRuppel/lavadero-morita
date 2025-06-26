@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('marcas', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique(); // El nombre de la marca (ej: "Toyota", "Ford")
+            $table->string('nombre')->unique();
             $table->timestamps();
         });
     }

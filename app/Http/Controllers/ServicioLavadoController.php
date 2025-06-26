@@ -12,80 +12,61 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth; // Asegúrate de importar Auth
+use Illuminate\Support\Facades\Auth;
 class ServicioLavadoController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        // 1. Determinar si el usuario logueado es un administrador
         $tabla = $user->getTable();
         
         $isAdmin = $tabla !== 'users';
-        //dd($isAdmin);
         $query = ServicioLavado::query();
-
-        // 2. Cargar ansiosamente todas las relaciones necesarias para mostrar la información
         $query->with([
-            'vehiculo.user',          // Para obtener el cliente asociado al vehículo
-            'vehiculo.tipoVehiculo',  // Para el nombre del tipo de vehículo
-            'vehiculo.modelo.marca',  // Para la marca y modelo detallados del vehículo
-            'tipoLavado',             // Para el nombre del tipo de lavado
-            'administrador'           // Para el nombre del administrador que realizó el servicio (si es visible para admin)
+            'vehiculo.user',
+            'vehiculo.tipoVehiculo',
+            'vehiculo.modelo.marca',
+            'tipoLavado',
+            'administrador'
         ]);
 
-        // 3. Filtrar servicios según el rol del usuario
         if (!$isAdmin) {
-            // Si es un cliente regular, solo mostrar sus propios servicios
-            // Se filtra por el user_id del vehículo asociado al servicio.
-            if ($user) { // Asegurarse de que haya un usuario cliente logueado
+            if ($user) {
                 $query->whereHas('vehiculo', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 });
             } else {
-                // Si no hay un cliente logueado, redirigir o mostrar error
                 return redirect()->route('login')->with('error', 'Debes iniciar sesión para ver tus servicios.');
             }
         }
-
-        // 4. Filtrar por servicios "finalizados" para el historial
-        $query->whereIn('estado_servicio', ['finalizado', 'cancelado']); // Puedes ajustar esto si quieres incluir otros estados
-
-        // 5. Ordenar por fecha de inicio (más recientes primero) y paginar
-        $servicios = $query->orderBy('fecha_hora_inicio', 'desc')->paginate(10); // Ajusta la cantidad por página si lo deseas
-
-        // 6. Mapear los datos para enviarlos a Inertia, controlando la visibilidad
+        $query->whereIn('estado_servicio', ['finalizado', 'cancelado']);
+        $servicios = $query->orderBy('fecha_hora_inicio', 'desc')->paginate(10);
         return Inertia::render('Servicios/Index', [
             'user' => $user,
             'servicios' => $servicios->through(fn ($servicio) => [
                 'id' => $servicio->id,
                 'fecha_inicio' => $servicio->fecha_hora_inicio->format('d/m/Y H:i'),
-                'fecha_fin' => $servicio->fecha_hora_fin ? $servicio->fecha_hora_fin->format('d/m/Y H:i') : 'N/A', // Usar N/A si aún no finaliza
+                'fecha_fin' => $servicio->fecha_hora_fin ? $servicio->fecha_hora_fin->format('d/m/Y H:i') : 'N/A',
                 'precio_total' => $servicio->precio_total_servicio,
                 'estado' => $servicio->estado_servicio,
-
-                // Información del vehículo (visible para ambos roles)
                 'vehiculo' => [
                     'patente' => $servicio->vehiculo->patente,
-                    'marca' => $servicio->vehiculo->modelo->marca->nombre ?? $servicio->vehiculo->marca, // Prioriza marca del modelo, sino la directa
-                    'modelo' => $servicio->vehiculo->modelo->nombre ?? $servicio->vehiculo->modelo, // Prioriza modelo del modelo, sino el directo
+                    'marca' => $servicio->vehiculo->modelo->marca->nombre ?? $servicio->vehiculo->marca,
+                    'modelo' => $servicio->vehiculo->modelo->nombre ?? $servicio->vehiculo->modelo,
                     'anio' => $servicio->vehiculo->anio,
                     'tipo_vehiculo_nombre' => $servicio->vehiculo->tipoVehiculo->nombre ?? 'N/A',
                 ],
-                // Información del tipo de lavado (visible para ambos roles)
                 'tipo_lavado' => [
                     'nombre' => $servicio->tipoLavado->nombre_lavado,
                 ],
-
-                // Información específica para el ADMINISTRADOR
-                'cliente' => $isAdmin && $servicio->vehiculo->user ? [ // Solo si es admin y hay un cliente asociado
+                'cliente' => $isAdmin && $servicio->vehiculo->user ? [
                     'id' => $servicio->vehiculo->user->id,
                     'name' => $servicio->vehiculo->user->name,
                     'email' => $servicio->vehiculo->user->email,
                 ] : null,
-                'administrador_nombre' => $isAdmin && $servicio->administrador ? $servicio->administrador->name : null, // Solo si es admin y hay admin
+                'administrador_nombre' => $isAdmin && $servicio->administrador ? $servicio->administrador->name : null,
             ]),
-            'isAdmin' => $isAdmin, // Pasar esta variable al frontend para control de visibilidad
+            'isAdmin' => $isAdmin,
         ]);
     }
     /**
@@ -130,27 +111,20 @@ class ServicioLavadoController extends Controller
         DB::beginTransaction();
         try {
             $box = Box::find($validatedData['box_id']);
-
-            // Verificar si el box al que se quiere asignar ya está ocupado
             if ($box->estado === 'ocupado') {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'El box ya está ocupado.');
             }
-
             $vehiculo = null;
             $tipoVehiculoPrecio = 0;
             $tipoLavadoPrecio = 0;
-
-            // Obtener o crear el vehículo
             if (!empty($validatedData['vehiculo_id'])) {
-                // Vehículo existente
                 $vehiculo = Vehiculo::with('tipoVehiculo')->find($validatedData['vehiculo_id']);
                 if (!$vehiculo) {
                     throw new \Exception("Vehículo existente no encontrado.");
                 }
                 $tipoVehiculoPrecio = $vehiculo->tipoVehiculo->precio ?? 0;
             } else {
-                // Nuevo vehículo
                 $userIdForNewVehicle = $request->input('user_id');
                 if (empty($userIdForNewVehicle)) {
                     throw new \Exception("No se proporcionó un cliente para el nuevo vehículo.");
@@ -160,17 +134,13 @@ class ServicioLavadoController extends Controller
                     'user_id' => $userIdForNewVehicle,
                     'tipo_vehiculo_id' => $validatedData['vehiculo_tipo_vehiculo_id_nuevo'],
                     'patente' => $validatedData['vehiculo_patente_nuevo'],
-                    'marca' => $validatedData['vehiculo_marca_nuevo'], // Asumiendo que 'marca' y 'modelo' son columnas directas en Vehiculo o las obtienes de Modelo
+                    'marca' => $validatedData['vehiculo_marca_nuevo'],
                     'modelo' => $validatedData['vehiculo_modelo_nuevo'],
                     'anio' => $validatedData['vehiculo_anio_nuevo'],
                 ]);
                 $tipoVehiculo = TipoVehiculo::find($validatedData['vehiculo_tipo_vehiculo_id_nuevo']);
                 $tipoVehiculoPrecio = $tipoVehiculo->precio ?? 0;
             }
-
-            // ==============================================================================
-            // NUEVA VALIDACIÓN: Verificar si el vehículo ya está en un box ocupado
-            // ==============================================================================
             $existingActiveServiceForVehicle = ServicioLavado::where('vehiculo_id', $vehiculo->id)
                                                              ->where('estado_servicio', 'en_curso')
                                                              ->first();
@@ -179,19 +149,12 @@ class ServicioLavadoController extends Controller
                 DB::rollBack();
                 return redirect()->back()->with('error', 'El vehículo seleccionado ya se encuentra en un box ocupado');
             }
-            // ==============================================================================
-
-            // Obtener el precio del tipo de lavado
             $tipoLavado = TipoLavado::find($validatedData['tipo_lavado_id']);
             if (!$tipoLavado) {
                 throw new \Exception("Tipo de lavado no encontrado.");
             }
             $tipoLavadoPrecio = $tipoLavado->precio ?? 0;
-
-            // Calcular el precio total del servicio
             $precioTotalServicio = $tipoLavadoPrecio + $tipoVehiculoPrecio;
-
-            // Actualizar estado del box y crear el servicio
             $box->update(['estado' => 'ocupado']);
 
             ServicioLavado::create([
@@ -237,9 +200,6 @@ class ServicioLavadoController extends Controller
             Log::info('Transacción de finalización de servicio ' . $servicioLavado->id . ' exitosa.');
             Log::info('Estado del box después del commit: ' . $servicioLavado->box->estado);
             Log::info('Estado del servicio después del commit: ' . $servicioLavado->estado_servicio);
-
-            // *** CAMBIO CRÍTICO AQUÍ ***
-            // Usa Inertia::location para una redirección del lado del cliente
             return Inertia::location(route('boxes.show', $servicioLavado->box_id));
 
         } catch (\Exception $e) {
@@ -256,18 +216,12 @@ class ServicioLavadoController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Cargar el box para actualizar su estado
             $box = $servicioLavado->box;
-
-            // Actualizar el servicio a 'cancelado'
             $servicioLavado->update([
                 'fecha_hora_fin' => now(),
                 'estado_servicio' => 'cancelado',
-                // Podrías poner precio_total_servicio a 0 o un valor de multa si aplica.
-                'precio_total_servicio' => 0, // O dejar el valor que tenía si no quieres descontar
+                'precio_total_servicio' => 0,
             ]);
-
-            // Actualizar el estado del box a 'activo'
             if ($box) {
                 $box->update(['estado' => 'activo']);
             }
@@ -289,55 +243,38 @@ class ServicioLavadoController extends Controller
      */
     public function update(Request $request, ServicioLavado $servicioLavado)
     {
-        // Validación
         $validated = $request->validate([
-            'precio_total_servicio' => 'nullable|numeric|min:0', // Precio final del servicio
-            'observaciones' => 'nullable|string|max:1000', // Campo opcional para observaciones
+            'precio_total_servicio' => 'nullable|numeric|min:0',
+            'observaciones' => 'nullable|string|max:1000',
         ]);
-
-        // Iniciar una transacción
         DB::beginTransaction();
-
         try {
-            // Solo se puede finalizar un servicio 'en_curso'
             if ($servicioLavado->estado_servicio !== 'en_curso') {
                 DB::rollBack();
                 return redirect()->back()
                                     ->with('error', 'El servicio no se puede finalizar porque no está en curso.');
             }
-
-            // Si no se proporcionó un precio_total_servicio, lo calculamos del tipo de lavado
             if (!isset($validated['precio_total_servicio'])) {
-                // Asegúrate de que TipoLavado esté cargado o cárgalo
-                $tipoLavado = $servicioLavado->tipoLavado; // Esto asume que tienes la relación en ServicioLavado Model
+                $tipoLavado = $servicioLavado->tipoLavado;
                 $validated['precio_total_servicio'] = $tipoLavado->precio;
             }
-
-            // Actualizar el servicio
             $servicioLavado->update([
-                'fecha_hora_fin' => now(), // La hora actual del servidor
+                'fecha_hora_fin' => now(),
                 'precio_total_servicio' => $validated['precio_total_servicio'],
                 'estado_servicio' => 'finalizado',
-                // 'observaciones' => $validated['observaciones'] ?? null, // Si agregas observaciones a la tabla
             ]);
-
-            // Cambiar el estado del box a 'activo' (o 'limpieza' si lo reintroduces)
-            $box = $servicioLavado->box; // Esto asume la relación en ServicioLavado Model
+            $box = $servicioLavado->box; 
             $box->update(['estado' => 'activo']);
-
-            DB::commit(); // Confirmar la transacción
-
+            DB::commit();
             return redirect()->route('boxes.show', $box->id)
                                 ->with('success', 'Servicio finalizado exitosamente. Box ahora activo.');
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Revertir la transacción
+            DB::rollBack();
             Log::error('Error al finalizar servicio de lavado: ' . $e->getMessage(), ['exception' => $e]);
             return redirect()->back()->with('error', 'Hubo un error al finalizar el servicio: ' . $e->getMessage());
         }
     }
-
-    // Opcional: Si quieres una forma de cancelar un servicio
     public function cancel(ServicioLavado $servicioLavado)
     {
         DB::beginTransaction();
@@ -348,7 +285,7 @@ class ServicioLavadoController extends Controller
             }
 
             $servicioLavado->update(['estado_servicio' => 'cancelado', 'fecha_hora_fin' => now()]);
-            $servicioLavado->box->update(['estado' => 'activo']); // El box vuelve a estar activo
+            $servicioLavado->box->update(['estado' => 'activo']);
 
             DB::commit();
             return redirect()->route('boxes.show', $servicioLavado->box_id)

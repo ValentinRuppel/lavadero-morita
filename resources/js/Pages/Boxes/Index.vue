@@ -15,8 +15,6 @@ const props = defineProps({
         default: null
     },
 });
-
-// Generar una clave única basada en los boxes para forzar reactividad
 const boxesKey = computed(() => props.boxes.map(box => box.id + box.estado).join('-'));
 
 const deleteBox = (id) => {
